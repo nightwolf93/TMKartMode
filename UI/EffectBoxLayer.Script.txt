@@ -25,19 +25,20 @@ Text GetManialink() {
 
                 while(True)
                 {
-                    declare netread Text Net_PlayerAvilEffectName for InputPlayer;
-                    Title.SetText(Net_PlayerAvilEffectName);
-                    foreach (Event in PendingEvents) {
-                        if (Event.Type == CMlScriptEvent::Type::KeyPress) {
-                            switch(Event.KeyCode) {
-                                case 33: {	// E
-                                    log("player clicked activation button");
-                                    SendPlayerActivatedEffect();
+                    if(InputPlayer != Null) {
+                        declare netread Text Net_PlayerAvilEffectName for InputPlayer;
+                        Title.SetText(Net_PlayerAvilEffectName);
+                        foreach (Event in PendingEvents) {
+                            if (Event.Type == CMlScriptEvent::Type::KeyPress) {
+                                switch(Event.KeyCode) {
+                                    case 33: {	// E
+                                        log("player clicked activation button");
+                                        SendPlayerActivatedEffect();
+                                    }
                                 }
                             }
                         }
                     }
-
                     yield;
                 }
 			}

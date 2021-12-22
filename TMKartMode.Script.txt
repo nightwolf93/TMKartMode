@@ -17,6 +17,8 @@
 
 #Struct K_SlotPlayerUI {
     Text EffectName;
+    CSmPlayer Player;
+    Text PlayerLogin;
 }
 
 ///////////
@@ -42,7 +44,7 @@ Void SetPlayerAvilEffect(CSmPlayer _player, Integer _effectIndex) {
 Void GivePlayerRandonAvilEffect(CSmPlayer _player) {
     declare Effects::K_BoxEffect Effect = Effects::GetRandomEffect();
     PlayersAvilEffectList[_player.User.Login] = Effect;
-    UIManager.GetUI(_player).QueueMessage(1000, 1, CUIConfig::EMessageDisplay::Big, TextLib::Compose("You get $<%1$>", Effect.Name));
+    //UIManager.GetUI(_player).QueueMessage(1000, 1, CUIConfig::EMessageDisplay::Big, TextLib::Compose("You get $<%1$>", Effect.Name));
     
     SyncPlayerAvilEffectWithUI(_player);
 }
@@ -68,13 +70,35 @@ Void OnPlayerActivedEffect(CSmPlayer CurrentPlayer) {
     declare Effects::K_BoxEffect AvilEffect = PlayersAvilEffectList[CurrentPlayer.User.Login];
     log("trying to activate an effect");
     if (AvilEffect.Name != "None") {
-        declare CSmPlayer NearestPlayer = GetNearestPlayer(CurrentPlayer);
+        log("activated an effect");
+        switch(AvilEffect.TargetMode) {
+            case "self": {
+                Effects::ActivateOnPlayer(CurrentPlayer, AvilEffect);
+                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Activated $<%1$> on you", AvilEffect.Name));
+                SetPlayerAvilEffect(CurrentPlayer, 0);
+            }
+
+            case "nearest": {
+                declare CSmPlayer NearestPlayer = GetNearestPlayer(CurrentPlayer);
+                Effects::ActivateOnPlayer(NearestPlayer, AvilEffect);
+                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Activated $<%1$> on $<%2$>", AvilEffect.Name, NearestPlayer.User.Name));
+                SetPlayerAvilEffect(CurrentPlayer, 0);
+            }
+
+            case "all": {
+                foreach(Player in Players) {
+                    if (Player.User.Login != CurrentPlayer.User.Login) {
+                        Effects::ActivateOnPlayer(Player, AvilEffect);
+                    }
+                }
+                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Activated $<%1$> on everyone", AvilEffect.Name));
+                SetPlayerAvilEffect(CurrentPlayer, 0);
+            }
+        }
         // for solo testing just comment this "if" statment
         //if (NearestPlayer.User.Login != _player.User.Login) {
-            Effects::ActivateOnPlayer(NearestPlayer, AvilEffect);
-            UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Activated $<%1$> on $<%2$>", AvilEffect.Name, NearestPlayer.User.Name));
-            SetPlayerAvilEffect(CurrentPlayer, 0);
-            log("activated an effect");
+
+            
         //}
     }
 }
@@ -96,6 +120,7 @@ Effects::InitEffects();
 
             declare K_SlotPlayerUI PlayerUI;
             PlayerUI.EffectName = Effects::GetByIndex(0).Name;
+            PlayerUI.Player = Player;
             PlayersUI[Player.User.Login] = PlayerUI;
             CreateUIForPlayer(Player);
 
@@ -103,9 +128,12 @@ Effects::InitEffects();
         }
     }
 
-
     /// Process events
     foreach (Event in PendingEvents) {
+        if(Event.Type == CSmModeEvent::EType::OnPlayerRemoved) {
+            log(Event.User.Login);
+            PlayersUI.removekey(Event.User.Login);
+        }
         if(Event.Type == CSmModeEvent::EType::OnPlayerTriggersWaypoint) {
             GivePlayerRandonAvilEffect(Event.Player); // Try to assign a random effect to the player
         }
@@ -116,6 +144,7 @@ Effects::InitEffects();
     }
 
     Private_HandleUIEvents();
+    Effects::ProcessEffectEventsLoop();
 ***
 
 /**
@@ -149,9 +178,10 @@ Effects::InitEffects();
 */
 
 Void CreateUIForPlayer(CSmPlayer _player) {
-    Layers::Create("EffectBoxLayer", EffectBoxLayer::GetManialink());
-    Layers::SetType("EffectBoxLayer", CUILayer::EUILayerType::Normal);
-    Layers::Attach("EffectBoxLayer", _player);
+    declare Text LayerId = TextLib::Compose("EffectBoxLayer_$<%1$>", _player.User.Login);
+    Layers::Create(LayerId, EffectBoxLayer::GetManialink());
+    Layers::SetType(LayerId, CUILayer::EUILayerType::Normal);
+    Layers::Attach(LayerId, _player);
 }
 
 Void Private_HandleUIEvents() {

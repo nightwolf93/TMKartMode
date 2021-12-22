@@ -1,13 +1,24 @@
 #Include "MathLib" as MathLib
+#Include "TextLib" as TextLib
+#Include "ColorLib"
 
 /////////////
 // Structs //
 /////////////
 
 #Struct K_BoxEffect {
-    Text    Name;
-    Text    Marker;
-    Text    Function;
+    Text        Name;
+    Text        Marker;
+    Text        TargetMode;
+    Integer     Duration;
+    Text        Function;
+}
+
+#Struct K_BoxEffectOnPlayer {
+    K_BoxEffect     Effect;
+    Integer         StartAt;
+    Integer         EndAt;
+    CSmPlayer       Player;
 }
 
 ///////////
@@ -15,6 +26,7 @@
 ///////////
 
 declare K_BoxEffect[] EffectsList;
+declare K_BoxEffectOnPlayer[Text] EffectsOnPlayerList;
 
 ///////////////
 // Functions //
@@ -29,6 +41,8 @@ Void InitEffects() {
     declare K_BoxEffect NoneEffect;
     NoneEffect.Name     = "None";
     NoneEffect.Marker   = "e_none";
+    NoneEffect.TargetMode   = "none";
+    NoneEffect.Duration   = 0;
     EffectsList.add(NoneEffect);
 
     // Thunder // NoEngine
@@ -36,19 +50,41 @@ Void InitEffects() {
     Thunder.Name     = "Thunder";
     Thunder.Marker   = "e_thunder";
     Thunder.Function = "SetPlayer_Delayed_NoEngine";
+    Thunder.TargetMode   = "nearest";
+    Thunder.Duration   = 5000;
     EffectsList.add(Thunder);
 
     // CruiseControlAll
     declare K_BoxEffect ForceCruiseControlAll;
     ForceCruiseControlAll.Name     = "Force Cruise Control";
     ForceCruiseControlAll.Marker   = "e_cruise_all";
+    ForceCruiseControlAll.TargetMode   = "all";
+    ForceCruiseControlAll.Duration   = 3500;
     EffectsList.add(ForceCruiseControlAll);
 
     // Turbo
     declare K_BoxEffect Turbo;
     Turbo.Name     = "Turbo";
     Turbo.Marker   = "e_turbo_self";
+    Turbo.TargetMode   = "self";
+    Turbo.Duration   = 2500;
     EffectsList.add(Turbo);
+
+    // Turbo2
+    declare K_BoxEffect SuperTurbo;
+    SuperTurbo.Name     = "Super Turbo";
+    SuperTurbo.Marker   = "e_turbo2_self";
+    SuperTurbo.TargetMode   = "self";
+    SuperTurbo.Duration   = 2500;
+    EffectsList.add(SuperTurbo);
+
+    // Fragile
+    declare K_BoxEffect Fragile;
+    Fragile.Name     = "Fragile";
+    Fragile.Marker   = "e_fragile";
+    Fragile.TargetMode   = "nearest";
+    Fragile.Duration   = 10000;
+    EffectsList.add(Fragile);
 }
 
 K_BoxEffect GetRandomEffect() {
@@ -66,5 +102,48 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
         case "e_turbo_self": {
             SetPlayer_Delayed_BoostUp(Player, True);
         }
+        case "e_turbo2_self": {
+            SetPlayer_Delayed_Boost2Up(Player, True);
+        }
+        case "e_fragile": {
+            SetPlayer_Delayed_Fragile(Player, True);
+        }
+    }
+    declare K_BoxEffectOnPlayer EffectOnPlayer;
+    EffectOnPlayer.Effect = Effect;
+    EffectOnPlayer.StartAt = Now;
+    EffectOnPlayer.EndAt = EffectOnPlayer.StartAt + Effect.Duration;
+    EffectOnPlayer.Player = Player;
+    EffectsOnPlayerList[TextLib::ToText(EffectOnPlayer.StartAt)] = EffectOnPlayer;
+}
+
+Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
+    if(_effectOnPlayer.Player != Null) {
+        switch(_effectOnPlayer.Effect.Marker) {
+            case "e_thunder": {
+                SetPlayer_Delayed_NoEngine(_effectOnPlayer.Player, False);
+            }
+            case "e_cruise_all": {
+                SetPlayer_Delayed_Cruise(_effectOnPlayer.Player, False, _effectOnPlayer.Player.Speed);
+            }
+            case "e_turbo_self": {
+                SetPlayer_Delayed_BoostUp(_effectOnPlayer.Player, False);
+            }
+             case "e_turbo2_self": {
+                SetPlayer_Delayed_Boost2Up(_effectOnPlayer.Player, False);
+            }
+            case "e_fragile": {
+                SetPlayer_Delayed_Fragile(_effectOnPlayer.Player, False);
+            }
+        }
+        UIManager.GetUI(_effectOnPlayer.Player).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Effect $<%1$> cleared", _effectOnPlayer.Effect.Name));
+    }
+    EffectsOnPlayerList.removekey(TextLib::ToText(_effectOnPlayer.StartAt));
+}
+
+Void ProcessEffectEventsLoop() {
+    foreach(EffectOnPlayer in EffectsOnPlayerList) {
+        if(Now < EffectOnPlayer.EndAt) continue;
+        UnActivateOnPlayer(EffectOnPlayer);
     }
 }
