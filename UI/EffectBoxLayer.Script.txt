@@ -1,5 +1,5 @@
 //#RequireContext CMlScriptIngame
-#Const C_ItemActivatedEvent_Type	"activated"
+#Const C_ActivateEffectEvent_Type	"activated"
 
 Text GetManialink() {
     return """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
@@ -12,10 +12,8 @@ Text GetManialink() {
 			#Include "TextLib" as TextLib
 			#Include "MathLib" as MathLib
 
-            Void SyncPlayerActivatedItem(Boolean IsPressed) {
-                if (IsPressed) {
-                    SendCustomEvent("{{{C_ItemActivatedEvent_Type}}}", ["pressed"]);
-                }
+            Void SendPlayerActivatedEffect() {
+                SendCustomEvent("{{{C_ActivateEffectEvent_Type}}}", []);
             }
 
 			main()
@@ -27,20 +25,18 @@ Text GetManialink() {
 
                 while(True)
                 {
-                    declare netread Text Net_PlayerItemName for InputPlayer;
-                    Title.SetText(Net_PlayerItemName);
+                    declare netread Text Net_PlayerAvilEffectName for InputPlayer;
+                    Title.SetText(Net_PlayerAvilEffectName);
                     foreach (Event in PendingEvents) {
                         if (Event.Type == CMlScriptEvent::Type::KeyPress) {
                             switch(Event.KeyCode) {
                                 case 33: {	// E
-                                    log("Effect key is pressed");
-                                    SyncPlayerActivatedItem(True);
+                                    log("player clicked activation button");
+                                    SendPlayerActivatedEffect();
                                 }
                             }
                         }
                     }
-
-                    SyncPlayerActivatedItem(False);
 
                     yield;
                 }

@@ -1,0 +1,70 @@
+#Include "MathLib" as MathLib
+
+/////////////
+// Structs //
+/////////////
+
+#Struct K_BoxEffect {
+    Text    Name;
+    Text    Marker;
+    Text    Function;
+}
+
+///////////
+// Plugs //
+///////////
+
+declare K_BoxEffect[] EffectsList;
+
+///////////////
+// Functions //
+///////////////
+
+K_BoxEffect GetByIndex(Integer Index) {
+    return EffectsList[Index];
+}
+
+Void InitEffects() {
+    // Thunder // NoEngine
+    declare K_BoxEffect NoneEffect;
+    NoneEffect.Name     = "None";
+    NoneEffect.Marker   = "e_none";
+    EffectsList.add(NoneEffect);
+
+    // Thunder // NoEngine
+    declare K_BoxEffect Thunder;
+    Thunder.Name     = "Thunder";
+    Thunder.Marker   = "e_thunder";
+    Thunder.Function = "SetPlayer_Delayed_NoEngine";
+    EffectsList.add(Thunder);
+
+    // CruiseControlAll
+    declare K_BoxEffect ForceCruiseControlAll;
+    ForceCruiseControlAll.Name     = "Force Cruise Control";
+    ForceCruiseControlAll.Marker   = "e_cruise_all";
+    EffectsList.add(ForceCruiseControlAll);
+
+    // Turbo
+    declare K_BoxEffect Turbo;
+    Turbo.Name     = "Turbo";
+    Turbo.Marker   = "e_turbo_self";
+    EffectsList.add(Turbo);
+}
+
+K_BoxEffect GetRandomEffect() {
+    return EffectsList[MathLib::Rand(1, EffectsList.count - 1)];
+}
+
+Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
+    switch(Effect.Marker) {
+        case "e_thunder": {
+            SetPlayer_Delayed_NoEngine(Player, True);
+        }
+        case "e_cruise_all": {
+            SetPlayer_Delayed_Cruise(Player, True, Player.Speed);
+        }
+        case "e_turbo_self": {
+            SetPlayer_Delayed_BoostUp(Player, True);
+        }
+    }
+}

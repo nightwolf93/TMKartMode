@@ -4,7 +4,9 @@
 #Include "MathLib" as MathLib
 #Include "ColorLib"
 
-#Include "Modes/TrackMania/UI/ItemBoxLayer.Script.txt" as ItemBoxLayer
+#Include "Modes/TrackMania/Common/Effects.Script.txt" as Effects
+
+#Include "Modes/TrackMania/UI/EffectBoxLayer.Script.txt" as EffectBoxLayer
 
 #Setting S_TrustClientSimu True
 #Setting S_UseCrudeExtrapolation False
@@ -13,34 +15,36 @@
 // Structs //
 /////////////
 
-#Struct K_BoxItem {
-    Text    Name;
-    Text Effect;
-}
-
 #Struct K_SlotPlayerUI {
-    Text ItemName;
+    Text EffectName;
 }
 
 ///////////
 // Plugs //
 ///////////
 
-declare K_BoxItem[] ItemsList;
-declare K_BoxItem[Text] PlayersItemList;
+declare Effects::K_BoxEffect[Text] PlayersAvilEffectList;
 declare K_SlotPlayerUI[Text] PlayersUI;
 
-Void SyncItemPlayer(CSmPlayer _player) {
-    declare K_BoxItem PlayerItem = PlayersItemList[_player.User.Login];
-    declare netwrite Text Net_PlayerItemName for _player;
-    Net_PlayerItemName = PlayerItem.Name;
+Void SyncPlayerAvilEffectWithUI(CSmPlayer _player) {
+    declare Effects::K_BoxEffect PlayerAvilEffect = PlayersAvilEffectList[_player.User.Login];
+    declare netwrite Text Net_PlayerAvilEffectName for _player;
+    Net_PlayerAvilEffectName = PlayerAvilEffect.Name;
 }
 
-Void SetPlayerItem(CSmPlayer _player, Integer _itemIndex) {
-    PlayersItemList[_player.User.Login] = ItemsList[_itemIndex];
-    PlayersUI[_player.User.Login].ItemName = ItemsList[_itemIndex].Name;
+Void SetPlayerAvilEffect(CSmPlayer _player, Integer _effectIndex) {
+    PlayersAvilEffectList[_player.User.Login] = Effects::GetByIndex(_effectIndex);
+    PlayersUI[_player.User.Login].EffectName = Effects::GetByIndex(_effectIndex).Name;
 
-    SyncItemPlayer(_player);
+    SyncPlayerAvilEffectWithUI(_player);
+}
+
+Void GivePlayerRandonAvilEffect(CSmPlayer _player) {
+    declare Effects::K_BoxEffect Effect = Effects::GetRandomEffect();
+    PlayersAvilEffectList[_player.User.Login] = Effect;
+    UIManager.GetUI(_player).QueueMessage(1000, 1, CUIConfig::EMessageDisplay::Big, TextLib::Compose("You get $<%1$>", Effect.Name));
+    
+    SyncPlayerAvilEffectWithUI(_player);
 }
 
 CSmPlayer GetNearestPlayer(CSmPlayer _player) {
@@ -60,17 +64,18 @@ CSmPlayer GetNearestPlayer(CSmPlayer _player) {
     return NearestPlayer;
 }
 
-Void OnPlayerActivedEffect(CSmPlayer _player) {
-    declare K_BoxItem PlayerItem = PlayersItemList[_player.User.Login];
-    log("trying to activate an item");
-    if (PlayerItem.Name != "None") {
-        declare CSmPlayer NearestPlayer = GetNearestPlayer(_player);
+Void OnPlayerActivedEffect(CSmPlayer CurrentPlayer) {
+    declare Effects::K_BoxEffect AvilEffect = PlayersAvilEffectList[CurrentPlayer.User.Login];
+    log("trying to activate an effect");
+    if (AvilEffect.Name != "None") {
+        declare CSmPlayer NearestPlayer = GetNearestPlayer(CurrentPlayer);
         // for solo testing just comment this "if" statment
-        if (NearestPlayer.User.Login != _player.User.login) {
-            SetPlayer_Delayed_Fragile(NearestPlayer, True);
-            SetPlayerItem(_player, 0);
-            log("activated an item");
-        }
+        //if (NearestPlayer.User.Login != _player.User.Login) {
+            Effects::ActivateOnPlayer(NearestPlayer, AvilEffect);
+            UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Activated $<%1$> on $<%2$>", AvilEffect.Name, NearestPlayer.User.Name));
+            SetPlayerAvilEffect(CurrentPlayer, 0);
+            log("activated an effect");
+        //}
     }
 }
 
@@ -79,7 +84,7 @@ Void OnPlayerActivedEffect(CSmPlayer _player) {
 UsePvECollisions = True;
 UsePvPCollisions = True;
 
-InitItems();
+Effects::InitEffects();
 ***
 
 ***Match_PlayLoop***
@@ -87,14 +92,14 @@ InitItems();
     // Init players that doesnt initialized
     foreach (Player in Players) {
         if(!PlayersUI.existskey(Player.User.Login)) {
-            PlayersItemList[Player.User.Login] = ItemsList[0];
+            PlayersAvilEffectList[Player.User.Login] = Effects::GetByIndex(0);
 
             declare K_SlotPlayerUI PlayerUI;
-            PlayerUI.ItemName = ItemsList[0].Name;
+            PlayerUI.EffectName = Effects::GetByIndex(0).Name;
             PlayersUI[Player.User.Login] = PlayerUI;
             CreateUIForPlayer(Player);
 
-            SyncItemPlayer(Player);
+            SyncPlayerAvilEffectWithUI(Player);
         }
     }
 
@@ -102,10 +107,10 @@ InitItems();
     /// Process events
     foreach (Event in PendingEvents) {
         if(Event.Type == CSmModeEvent::EType::OnPlayerTriggersWaypoint) {
-            TryToAssignRandomItemToPlayer(Event.Player); // Try to assign a random item to the player
+            GivePlayerRandonAvilEffect(Event.Player); // Try to assign a random effect to the player
         }
         if(Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn) {
-            SetPlayerItem(Event.Player, 0); // Remove the item from the player
+            SetPlayerAvilEffect(Event.Player, 0); // Remove the effect from the player
         }
 
     }
@@ -143,53 +148,15 @@ InitItems();
 ***
 */
 
-Void InitItems() {
-    // Thunder // NoEngine
-    declare K_BoxItem NoneItem;
-    NoneItem.Name = "None";
-    NoneItem.Effect = "e_none";
-    ItemsList.add(NoneItem);
-
-    // Thunder // NoEngine
-    declare K_BoxItem ThunderItem;
-    ThunderItem.Name = "Thunder";
-    ThunderItem.Effect = "e_thunder";
-    ItemsList.add(ThunderItem);
-
-    // CruiseControlAll
-    declare K_BoxItem ForceCruiseControlAll;
-    ForceCruiseControlAll.Name = "Force Cruise Control";
-    ForceCruiseControlAll.Effect = "e_cruise_all";
-    ItemsList.add(ForceCruiseControlAll);
-
-    // Turbo
-    declare K_BoxItem Turbo;
-    Turbo.Name = "Turbo";
-    Turbo.Effect = "e_turbo_self";
-    ItemsList.add(Turbo);
-}
-
-K_BoxItem GetRandomItem() {
-    return ItemsList[MathLib::Rand(1, ItemsList.count - 1)];
-}
-
-Void TryToAssignRandomItemToPlayer(CSmPlayer _player) {
-    declare K_BoxItem Item = GetRandomItem();
-    PlayersItemList[_player.User.Login] = Item;
-    UIManager.GetUI(_player).QueueMessage(3000, 1, CUIConfig::EMessageDisplay::Big, TextLib::Compose("You get $<%1$>", Item.Name));
-    
-    SyncItemPlayer(_player);
-}
-
 Void CreateUIForPlayer(CSmPlayer _player) {
-    Layers::Create("ItemBoxLayer", ItemBoxLayer::GetManialink());
-    Layers::SetType("ItemBoxLayer", CUILayer::EUILayerType::Normal);
-    Layers::Attach("ItemBoxLayer", _player);
+    Layers::Create("EffectBoxLayer", EffectBoxLayer::GetManialink());
+    Layers::SetType("EffectBoxLayer", CUILayer::EUILayerType::Normal);
+    Layers::Attach("EffectBoxLayer", _player);
 }
 
 Void Private_HandleUIEvents() {
 	foreach (Event in UIManager.PendingEvents) {
-		if(Event.CustomEventType == ItemBoxLayer::C_ItemActivatedEvent_Type) {
+		if(Event.CustomEventType == EffectBoxLayer::C_ActivateEffectEvent_Type) {
             log("got even from the player");
 			declare CSmPlayer Player = GetPlayer(Event.UI);
 			if(Player == Null) continue;
