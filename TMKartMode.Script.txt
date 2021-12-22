@@ -36,6 +36,44 @@ Void SyncItemPlayer(CSmPlayer _player) {
     Net_PlayerItemName = PlayerItem.Name;
 }
 
+Void SetPlayerItem(CSmPlayer _player, Integer _itemIndex) {
+    PlayersItemList[_player.User.Login] = ItemsList[_itemIndex];
+    PlayersUI[_player.User.Login].ItemName = ItemsList[_itemIndex].Name;
+
+    SyncItemPlayer(_player);
+}
+
+CSmPlayer GetNearestPlayer(CSmPlayer _player) {
+    declare CSmPlayer NearestPlayer = _player;
+    declare Real NearestDistance = 100000.00;
+
+    foreach (Player in Players) {
+        if (Player.User.Login != _player.User.Login) {
+            declare Real CurrentDistance = MathLib::Abs(MathLib::Distance(Player.Position, _player.Position));
+            if (CurrentDistance < NearestDistance) {
+                NearestDistance = CurrentDistance;
+                NearestPlayer = Player;
+            }
+        }
+    }
+
+    return NearestPlayer;
+}
+
+Void OnPlayerActivedEffect(CSmPlayer _player) {
+    declare K_BoxItem PlayerItem = PlayersItemList[_player.User.Login];
+    log("trying to activate an item");
+    if (PlayerItem.Name != "None") {
+        declare CSmPlayer NearestPlayer = GetNearestPlayer(_player);
+        // for solo testing just comment this "if" statment
+        if (NearestPlayer.User.Login != _player.User.login) {
+            SetPlayer_Delayed_Fragile(NearestPlayer, True);
+            SetPlayerItem(_player, 0);
+            log("activated an item");
+        }
+    }
+}
+
 ***Match_StartServer***
 ***
 UsePvECollisions = True;
@@ -71,6 +109,8 @@ InitItems();
         }
 
     }
+
+    Private_HandleUIEvents();
 ***
 
 /**
@@ -133,11 +173,6 @@ K_BoxItem GetRandomItem() {
     return ItemsList[MathLib::Rand(1, ItemsList.count - 1)];
 }
 
-Void SetPlayerItem(CSmPlayer _player, Integer _itemIndex) {
-    PlayersItemList[_player.User.Login] = ItemsList[_itemIndex];
-    PlayersUI[_player.User.Login].ItemName = ItemsList[_itemIndex].Name;
-}
-
 Void TryToAssignRandomItemToPlayer(CSmPlayer _player) {
     declare K_BoxItem Item = GetRandomItem();
     PlayersItemList[_player.User.Login] = Item;
@@ -150,4 +185,15 @@ Void CreateUIForPlayer(CSmPlayer _player) {
     Layers::Create("ItemBoxLayer", ItemBoxLayer::GetManialink());
     Layers::SetType("ItemBoxLayer", CUILayer::EUILayerType::Normal);
     Layers::Attach("ItemBoxLayer", _player);
+}
+
+Void Private_HandleUIEvents() {
+	foreach (Event in UIManager.PendingEvents) {
+		if(Event.CustomEventType == ItemBoxLayer::C_ItemActivatedEvent_Type) {
+            log("got even from the player");
+			declare CSmPlayer Player = GetPlayer(Event.UI);
+			if(Player == Null) continue;
+			OnPlayerActivedEffect(Player);
+		}
+	}
 }

@@ -1,4 +1,5 @@
 //#RequireContext CMlScriptIngame
+#Const C_ItemActivatedEvent_Type	"activated"
 
 Text GetManialink() {
     return """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
@@ -10,6 +11,12 @@ Text GetManialink() {
 		<script><!--
 			#Include "TextLib" as TextLib
 			#Include "MathLib" as MathLib
+
+            Void SyncPlayerActivatedItem(Boolean IsPressed) {
+                if (IsPressed) {
+                    SendCustomEvent("{{{C_ItemActivatedEvent_Type}}}", ["pressed"]);
+                }
+            }
 
 			main()
 			{
@@ -26,11 +33,15 @@ Text GetManialink() {
                         if (Event.Type == CMlScriptEvent::Type::KeyPress) {
                             switch(Event.KeyCode) {
                                 case 33: {	// E
-
+                                    log("Effect key is pressed");
+                                    SyncPlayerActivatedItem(True);
                                 }
                             }
                         }
                     }
+
+                    SyncPlayerActivatedItem(False);
+
                     yield;
                 }
 			}
