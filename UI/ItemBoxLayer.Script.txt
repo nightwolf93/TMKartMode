@@ -1,0 +1,39 @@
+//#RequireContext CMlScriptIngame
+
+Text GetManialink() {
+    return """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+    <manialink version="3">
+		<frame id="Window" hidden="0">
+            <quad id="TitleBackground" pos="0 80" z-index="2" valign="top" halign="center" size="50 12" style="EnergyBar" opacity="0.9"/>
+            <label id="Title" pos="0 76" z-index="3" textcolor="FFFF" valign="top" halign="center" style="TextValueSmallSm"/>
+		</frame>
+		<script><!--
+			#Include "TextLib" as TextLib
+			#Include "MathLib" as MathLib
+
+			main()
+			{
+				declare CMlFrame Window = (Page.GetFirstChild("Window") as CMlFrame);
+                Window.Visible = True;
+                declare CMlLabel Title = (Page.GetFirstChild("Title") as CMlLabel);
+                Title.SetText("No Item");
+
+                while(True)
+                {
+                    declare netread Text Net_PlayerItemName for InputPlayer;
+                    Title.SetText(Net_PlayerItemName);
+                    foreach (Event in PendingEvents) {
+                        if (Event.Type == CMlScriptEvent::Type::KeyPress) {
+                            switch(Event.KeyCode) {
+                                case 33: {	// E
+
+                                }
+                            }
+                        }
+                    }
+                    yield;
+                }
+			}
+		--></script>
+	</manialink>""";
+}

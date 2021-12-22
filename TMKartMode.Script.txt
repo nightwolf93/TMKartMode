@@ -1,0 +1,153 @@
+#Extends "Modes/TrackMania/TM_Cup_Online.Script.txt"
+
+#Include "TextLib" as TextLib
+#Include "MathLib" as MathLib
+#Include "ColorLib"
+
+#Include "Modes/TrackMania/UI/ItemBoxLayer.Script.txt" as ItemBoxLayer
+
+#Setting S_TrustClientSimu True
+#Setting S_UseCrudeExtrapolation False
+
+/////////////
+// Structs //
+/////////////
+
+#Struct K_BoxItem {
+    Text    Name;
+    Text Effect;
+}
+
+#Struct K_SlotPlayerUI {
+    Text ItemName;
+}
+
+///////////
+// Plugs //
+///////////
+
+declare K_BoxItem[] ItemsList;
+declare K_BoxItem[Text] PlayersItemList;
+declare K_SlotPlayerUI[Text] PlayersUI;
+
+Void SyncItemPlayer(CSmPlayer _player) {
+    declare K_BoxItem PlayerItem = PlayersItemList[_player.User.Login];
+    declare netwrite Text Net_PlayerItemName for _player;
+    Net_PlayerItemName = PlayerItem.Name;
+}
+
+***Match_StartServer***
+***
+UsePvECollisions = True;
+UsePvPCollisions = True;
+
+InitItems();
+***
+
+***Match_PlayLoop***
+***
+    // Init players that doesnt initialized
+    foreach (Player in Players) {
+        if(!PlayersUI.existskey(Player.User.Login)) {
+            PlayersItemList[Player.User.Login] = ItemsList[0];
+
+            declare K_SlotPlayerUI PlayerUI;
+            PlayerUI.ItemName = ItemsList[0].Name;
+            PlayersUI[Player.User.Login] = PlayerUI;
+            CreateUIForPlayer(Player);
+
+            SyncItemPlayer(Player);
+        }
+    }
+
+
+    /// Process events
+    foreach (Event in PendingEvents) {
+        if(Event.Type == CSmModeEvent::EType::OnPlayerTriggersWaypoint) {
+            TryToAssignRandomItemToPlayer(Event.Player); // Try to assign a random item to the player
+        }
+        if(Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn) {
+            SetPlayerItem(Event.Player, 0); // Remove the item from the player
+        }
+
+    }
+***
+
+/**
+***Match_InitRound***
+***
+***
+
+***MB_Private_AfterEndRound***
+***
+***
+
+***Match_InitMap***
+***
+
+***
+
+***MB_Private_AfterEndMap***
+***
+
+***
+
+***Match_InitMatch***
+***
+
+***
+
+***MB_Private_AfterEndMatch***
+***
+
+***
+*/
+
+Void InitItems() {
+    // Thunder // NoEngine
+    declare K_BoxItem NoneItem;
+    NoneItem.Name = "None";
+    NoneItem.Effect = "e_none";
+    ItemsList.add(NoneItem);
+
+    // Thunder // NoEngine
+    declare K_BoxItem ThunderItem;
+    ThunderItem.Name = "Thunder";
+    ThunderItem.Effect = "e_thunder";
+    ItemsList.add(ThunderItem);
+
+    // CruiseControlAll
+    declare K_BoxItem ForceCruiseControlAll;
+    ForceCruiseControlAll.Name = "Force Cruise Control";
+    ForceCruiseControlAll.Effect = "e_cruise_all";
+    ItemsList.add(ForceCruiseControlAll);
+
+    // Turbo
+    declare K_BoxItem Turbo;
+    Turbo.Name = "Turbo";
+    Turbo.Effect = "e_turbo_self";
+    ItemsList.add(Turbo);
+}
+
+K_BoxItem GetRandomItem() {
+    return ItemsList[MathLib::Rand(1, ItemsList.count - 1)];
+}
+
+Void SetPlayerItem(CSmPlayer _player, Integer _itemIndex) {
+    PlayersItemList[_player.User.Login] = ItemsList[_itemIndex];
+    PlayersUI[_player.User.Login].ItemName = ItemsList[_itemIndex].Name;
+}
+
+Void TryToAssignRandomItemToPlayer(CSmPlayer _player) {
+    declare K_BoxItem Item = GetRandomItem();
+    PlayersItemList[_player.User.Login] = Item;
+    UIManager.GetUI(_player).QueueMessage(3000, 1, CUIConfig::EMessageDisplay::Big, TextLib::Compose("You get $<%1$>", Item.Name));
+    
+    SyncItemPlayer(_player);
+}
+
+Void CreateUIForPlayer(CSmPlayer _player) {
+    Layers::Create("ItemBoxLayer", ItemBoxLayer::GetManialink());
+    Layers::SetType("ItemBoxLayer", CUILayer::EUILayerType::Normal);
+    Layers::Attach("ItemBoxLayer", _player);
+}
