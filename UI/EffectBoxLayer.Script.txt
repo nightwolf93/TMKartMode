@@ -38,6 +38,21 @@ Text GetManialink() {
                                 }
                             }
                         }
+                        
+                        if (Input.PendingEvents.count > 0) {
+                        	if(Input.PendingEvents[0].Pad.Type != CInputPad::EPadType::Keyboard) {
+                                foreach (Event in Input.PendingEvents) {
+                                    if (Event.Type == CInputEvent::EType::PadButtonPress) {
+                                        switch(Event.Button) {
+                                            case CInputEvent::EButton::LeftStick: {
+                                                log("player clicked activation button");
+                                                SendPlayerActivatedEffect();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     yield;
                 }

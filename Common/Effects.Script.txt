@@ -58,7 +58,7 @@ Void InitEffects() {
     declare K_BoxEffect ForceCruiseControlAll;
     ForceCruiseControlAll.Name     = "Force Cruise Control";
     ForceCruiseControlAll.Marker   = "e_cruise_all";
-    ForceCruiseControlAll.TargetMode   = "all";
+    ForceCruiseControlAll.TargetMode   = "nearest";
     ForceCruiseControlAll.Duration   = 3500;
     EffectsList.add(ForceCruiseControlAll);
 
