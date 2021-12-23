@@ -37,60 +37,60 @@ K_BoxEffect GetByIndex(Integer Index) {
 }
 
 Void InitEffects() {
-    // Thunder // NoEngine
+    // None effect
     declare K_BoxEffect NoneEffect;
-    NoneEffect.Name     = "None";
-    NoneEffect.Marker   = "e_none";
-    NoneEffect.TargetMode   = "none";
+    NoneEffect.Name       = "None";
+    NoneEffect.Marker     = "e_none";
+    NoneEffect.TargetMode = "none";
     NoneEffect.Duration   = 0;
     EffectsList.add(NoneEffect);
 
     // Thunder // NoEngine
     declare K_BoxEffect Thunder;
-    Thunder.Name     = "Thunder";
-    Thunder.Marker   = "e_thunder";
-    Thunder.Function = "SetPlayer_Delayed_NoEngine";
-    Thunder.TargetMode   = "nearest";
+    Thunder.Name       = "Thunder";
+    Thunder.Marker     = "e_thunder";
+    Thunder.Function   = "SetPlayer_Delayed_NoEngine";
+    Thunder.TargetMode = "nearest";
     Thunder.Duration   = 5000;
     EffectsList.add(Thunder);
 
     // CruiseControlAll
     declare K_BoxEffect ForceCruiseControlAll;
-    ForceCruiseControlAll.Name     = "Force Cruise Control";
-    ForceCruiseControlAll.Marker   = "e_cruise_all";
-    ForceCruiseControlAll.TargetMode   = "nearest";
+    ForceCruiseControlAll.Name       = "Force Cruise Control";
+    ForceCruiseControlAll.Marker     = "e_cruise_all";
+    ForceCruiseControlAll.TargetMode = "nearest";
     ForceCruiseControlAll.Duration   = 3500;
     EffectsList.add(ForceCruiseControlAll);
 
     // Turbo
     declare K_BoxEffect Turbo;
-    Turbo.Name     = "Turbo";
-    Turbo.Marker   = "e_turbo_self";
-    Turbo.TargetMode   = "self";
+    Turbo.Name       = "Turbo";
+    Turbo.Marker     = "e_turbo_self";
+    Turbo.TargetMode = "self";
     Turbo.Duration   = 2500;
     EffectsList.add(Turbo);
 
     // Turbo2
     declare K_BoxEffect SuperTurbo;
-    SuperTurbo.Name     = "Super Turbo";
-    SuperTurbo.Marker   = "e_turbo2_self";
-    SuperTurbo.TargetMode   = "self";
+    SuperTurbo.Name       = "Super Turbo";
+    SuperTurbo.Marker     = "e_turbo2_self";
+    SuperTurbo.TargetMode = "self";
     SuperTurbo.Duration   = 2500;
     EffectsList.add(SuperTurbo);
 
     // Fragile
     declare K_BoxEffect Fragile;
-    Fragile.Name     = "Fragile";
-    Fragile.Marker   = "e_fragile";
-    Fragile.TargetMode   = "nearest";
+    Fragile.Name       = "Fragile";
+    Fragile.Marker     = "e_fragile";
+    Fragile.TargetMode = "nearest";
     Fragile.Duration   = 10000;
     EffectsList.add(Fragile);
 
     // NoBrake
     declare K_BoxEffect NoBrake;
-    NoBrake.Name     = "No Brake";
-    NoBrake.Marker   = "e_nobrake";
-    NoBrake.TargetMode   = "nearest";
+    NoBrake.Name       = "No Brake";
+    NoBrake.Marker     = "e_nobrake";
+    NoBrake.TargetMode = "nearest";
     NoBrake.Duration   = 5000;
     EffectsList.add(NoBrake);
 }
@@ -161,12 +161,17 @@ Void ClearEffectOnPlayer(CSmPlayer Player) {
             UnActivateOnPlayer(EffectOnPlayer);
         }
     }
-    SetPlayer_Delayed_NoEngine(Player, False);
-    SetPlayer_Delayed_Cruise(Player, False, Player.Speed);
-    SetPlayer_Delayed_BoostUp(Player, False);
-    SetPlayer_Delayed_Boost2Up(Player, False);
-    SetPlayer_Delayed_Fragile(Player, False);
-    SetPlayer_Delayed_NoBrakes(Player, False);
+    /*
+        // this part is triggering an error:
+        // DelayedVariableModification is busy, check with SetPlayer_DelayedIsFull before calling
+        // is foreach above is not enough?
+        SetPlayer_Delayed_NoEngine(Player, False);
+        SetPlayer_Delayed_Cruise(Player, False, Player.Speed);
+        SetPlayer_Delayed_BoostUp(Player, False);
+        SetPlayer_Delayed_Boost2Up(Player, False);
+        SetPlayer_Delayed_Fragile(Player, False);
+        SetPlayer_Delayed_NoBrakes(Player, False);
+    */
 }
 
 Void ProcessEffectEventsLoop() {
