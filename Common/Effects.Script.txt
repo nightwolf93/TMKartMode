@@ -85,6 +85,14 @@ Void InitEffects() {
     Fragile.TargetMode   = "nearest";
     Fragile.Duration   = 10000;
     EffectsList.add(Fragile);
+
+    // NoBrake
+    declare K_BoxEffect NoBrake;
+    NoBrake.Name     = "No Brake";
+    NoBrake.Marker   = "e_nobrake";
+    NoBrake.TargetMode   = "nearest";
+    NoBrake.Duration   = 5000;
+    EffectsList.add(NoBrake);
 }
 
 K_BoxEffect GetRandomEffect() {
@@ -107,6 +115,9 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
         }
         case "e_fragile": {
             SetPlayer_Delayed_Fragile(Player, True);
+        }
+        case "e_nobrake": {
+            SetPlayer_Delayed_NoBrakes(Player, True);
         }
     }
     declare K_BoxEffectOnPlayer EffectOnPlayer;
@@ -135,10 +146,27 @@ Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
             case "e_fragile": {
                 SetPlayer_Delayed_Fragile(_effectOnPlayer.Player, False);
             }
+             case "e_nobrake": {
+                SetPlayer_Delayed_NoBrakes(_effectOnPlayer.Player, False);
+            }
         }
         UIManager.GetUI(_effectOnPlayer.Player).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Effect $<%1$> cleared", _effectOnPlayer.Effect.Name));
     }
     EffectsOnPlayerList.removekey(TextLib::ToText(_effectOnPlayer.StartAt));
+}
+
+Void ClearEffectOnPlayer(CSmPlayer Player) {
+    foreach(EffectOnPlayer in EffectsOnPlayerList) {
+        if(EffectOnPlayer.Player.User.Login == Player.User.Login) {
+            UnActivateOnPlayer(EffectOnPlayer);
+        }
+    }
+    SetPlayer_Delayed_NoEngine(Player, False);
+    SetPlayer_Delayed_Cruise(Player, False, Player.Speed);
+    SetPlayer_Delayed_BoostUp(Player, False);
+    SetPlayer_Delayed_Boost2Up(Player, False);
+    SetPlayer_Delayed_Fragile(Player, False);
+    SetPlayer_Delayed_NoBrakes(Player, False);
 }
 
 Void ProcessEffectEventsLoop() {

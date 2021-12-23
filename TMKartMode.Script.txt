@@ -139,6 +139,7 @@ Effects::InitEffects();
         }
         if(Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn) {
             SetPlayerAvilEffect(Event.Player, 0); // Remove the effect from the player
+            Effects::ClearEffectOnPlayer(Event.Player);
         }
 
     }
