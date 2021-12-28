@@ -93,6 +93,30 @@ Void InitEffects() {
     NoBrake.TargetMode   = "nearest";
     NoBrake.Duration   = 5000;
     EffectsList.add(NoBrake);
+
+    // LowGravity
+    declare K_BoxEffect LowGravity;
+    LowGravity.Name     = "Low Gravity";
+    LowGravity.Marker   = "e_low_gravity";
+    LowGravity.TargetMode   = "nearest";
+    LowGravity.Duration   = 5000;
+    EffectsList.add(LowGravity);
+
+    // SlowMo
+    declare K_BoxEffect SlowMo;
+    SlowMo.Name     = "Slow Motion";
+    SlowMo.Marker   = "e_slowmo";
+    SlowMo.TargetMode   = "nearest";
+    SlowMo.Duration   = 2500;
+    EffectsList.add(SlowMo);
+
+    // Yeet
+    declare K_BoxEffect Yeet;
+    Yeet.Name     = "YEEET";
+    Yeet.Marker   = "e_turbo2_self";
+    Yeet.TargetMode   = "nearest";
+    Yeet.Duration   = 3000;
+    EffectsList.add(Yeet);
 }
 
 K_BoxEffect GetRandomEffect() {
@@ -118,6 +142,12 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
         }
         case "e_nobrake": {
             SetPlayer_Delayed_NoBrakes(Player, True);
+        }
+        case "e_low_gravity": {
+            SetPlayer_Delayed_GravityCoef(Player, 0.3);
+        }
+        case "e_slowmo": {
+            SetPlayer_Delayed_SlowMotion(Player, True);
         }
     }
     declare K_BoxEffectOnPlayer EffectOnPlayer;
@@ -146,8 +176,14 @@ Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
             case "e_fragile": {
                 SetPlayer_Delayed_Fragile(_effectOnPlayer.Player, False);
             }
-             case "e_nobrake": {
+            case "e_nobrake": {
                 SetPlayer_Delayed_NoBrakes(_effectOnPlayer.Player, False);
+            }
+            case "e_low_gravity": {
+                SetPlayer_Delayed_GravityCoef(_effectOnPlayer.Player, 1.0);
+            }
+            case "e_slowmo": {
+                SetPlayer_Delayed_SlowMotion(_effectOnPlayer.Player, False);
             }
         }
         UIManager.GetUI(_effectOnPlayer.Player).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Effect $<%1$> cleared", _effectOnPlayer.Effect.Name));
@@ -167,6 +203,8 @@ Void ClearEffectOnPlayer(CSmPlayer Player) {
     SetPlayer_Delayed_Boost2Up(Player, False);
     SetPlayer_Delayed_Fragile(Player, False);
     SetPlayer_Delayed_NoBrakes(Player, False);
+    SetPlayer_Delayed_GravityCoef(Player, 1.0);
+    SetPlayer_Delayed_SlowMotion(Player, False);
 }
 
 Void ProcessEffectEventsLoop() {

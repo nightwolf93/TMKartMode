@@ -100,6 +100,9 @@ Void OnPlayerActivedEffect(CSmPlayer CurrentPlayer) {
 
             
         //}
+    } else {
+        //log("Triggered");
+        //SetPlayer_Delayed_GravityCoef(CurrentPlayer, 0.1);
     }
 }
 
