@@ -41,12 +41,17 @@ Void SetPlayerAvilEffect(CSmPlayer _player, Integer _effectIndex) {
     SyncPlayerAvilEffectWithUI(_player);
 }
 
-Void GivePlayerRandonAvilEffect(CSmPlayer _player) {
+Void GivePlayerRandomAvilEffect(CSmPlayer _player) {
     declare Effects::K_BoxEffect Effect = Effects::GetRandomEffect();
     PlayersAvilEffectList[_player.User.Login] = Effect;
     //UIManager.GetUI(_player).QueueMessage(1000, 1, CUIConfig::EMessageDisplay::Big, TextLib::Compose("You get $<%1$>", Effect.Name));
     
     SyncPlayerAvilEffectWithUI(_player);
+}
+
+Void CleanUp() {
+    PlayersUI.clear();
+    PlayersAvilEffectList.clear();
 }
 
 CSmPlayer GetNearestPlayer(CSmPlayer _player) {
@@ -133,16 +138,22 @@ Effects::InitEffects();
 
     /// Process events
     foreach (Event in PendingEvents) {
-        if(Event.Type == CSmModeEvent::EType::OnPlayerRemoved) {
-            log(Event.User.Login);
-            PlayersUI.removekey(Event.User.Login);
-        }
         if(Event.Type == CSmModeEvent::EType::OnPlayerTriggersWaypoint) {
-            GivePlayerRandonAvilEffect(Event.Player); // Try to assign a random effect to the player
+            GivePlayerRandomAvilEffect(Event.Player); // Try to assign a random effect to the player
         }
         if(Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn) {
             SetPlayerAvilEffect(Event.Player, 0); // Remove the effect from the player
             Effects::ClearEffectOnPlayer(Event.Player);
+        }
+        if(Event.Type == CSmModeEvent::EType::OnPlayerAdded) {
+            
+        }
+        if(Event.Type == CSmModeEvent::EType::OnPlayerRemoved) {
+            // Event.Player is Null; Only User available
+            PlayersUI.removekey(Event.User.Login);
+            PlayersAvilEffectList.removekey(Event.User.Login);
+            // probable need to call Effects::ClearEffectOnPlayer(Event.Player);
+            // but Event.Player is Null, so need to modify ClearEffectOnPlayer
         }
 
     }
@@ -151,26 +162,27 @@ Effects::InitEffects();
     Effects::ProcessEffectEventsLoop();
 ***
 
-/**
-***Match_InitRound***
+***Match_InitMap***
 ***
+    CleanUp();
 ***
 
+***Match_InitMatch***
+***
+    CleanUp();
+***
+
+***Match_InitRound***
+***
+    CleanUp();
+***
+
+/**
 ***MB_Private_AfterEndRound***
 ***
 ***
 
-***Match_InitMap***
-***
-
-***
-
 ***MB_Private_AfterEndMap***
-***
-
-***
-
-***Match_InitMatch***
 ***
 
 ***

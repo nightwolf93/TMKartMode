@@ -5,8 +5,8 @@ Text GetManialink() {
     return """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
     <manialink version="3">
 		<frame id="Window" hidden="0">
-            <quad id="TitleBackground" pos="0 80" z-index="2" valign="top" halign="center" size="50 12" style="EnergyBar" opacity="0.9"/>
-            <label id="Title" pos="0 76" z-index="3" textcolor="FFFF" valign="top" halign="center" style="TextValueSmallSm"/>
+            <quad id="TitleBackground" pos="0 80" z-index="2" valign="top" halign="center" size="70 8" style="Bgs1" substyle="BgWindow2" opacity="0.9" />
+            <label id="Title" pos="0 78.5" z-index="3" textcolor="FFF" valign="top" halign="center" style="TextValueSmallSm" text="text"/>
 		</frame>
 		<script><!--
 			#Include "TextLib" as TextLib
@@ -22,6 +22,7 @@ Text GetManialink() {
                 Window.Visible = True;
                 declare CMlLabel Title = (Page.GetFirstChild("Title") as CMlLabel);
                 Title.SetText("No Item");
+                declare CMlMediaPlayer  VideoTransition <=> (Page.GetFirstChild("VideoTransitionBrowseTracks") as CMlMediaPlayer);
 
                 while(True)
                 {
