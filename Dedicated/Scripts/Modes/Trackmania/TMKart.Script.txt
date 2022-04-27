@@ -7,6 +7,7 @@
 
 #Include "Libs/TMKart/Effects.Script.txt" as Effects
 #Include "Libs/TMKart/UI/EffectBoxLayer.Script.txt" as EffectBoxLayer
+#Include "Libs/TMKart/UI/EffectInkSplats.Script.txt" as InkSplats
 
 #Setting S_TrustClientSimu True
 #Setting S_UseCrudeExtrapolation False
@@ -133,24 +134,28 @@ foreach (Player in Players) {
         PlayerUI.EffectName = Effects::GetByIndex(0).Name;
         PlayerUI.Player = Player;
         PlayersUI[Player.User.Login] = PlayerUI;
-        CreateUIForPlayer(Player);
 
+        CreateUIForPlayer(Player);
         SyncPlayerAvilEffectWithUI(Player);
     }
 }
 
 /// Process events
 foreach (Event in PendingEvents) {
+
     if(Event.Type == CSmModeEvent::EType::OnPlayerTriggersWaypoint) {
         GivePlayerRandomAvilEffect(Event.Player); // Try to assign a random effect to the player
     }
+
     if(Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn) {
         SetPlayerAvilEffect(Event.Player, 0); // Remove the effect from the player
         Effects::ClearEffectOnPlayer(Event.Player);
     }
+
     if(Event.Type == CSmModeEvent::EType::OnPlayerAdded) {
 
     }
+
     if(Event.Type == CSmModeEvent::EType::OnPlayerRemoved) {
         // Event.Player is Null; Only User available
         PlayersUI.removekey(Event.User.Login);
@@ -158,7 +163,6 @@ foreach (Event in PendingEvents) {
         // probable need to call Effects::ClearEffectOnPlayer(Event.Player);
         // but Event.Player is Null, so need to modify ClearEffectOnPlayer
     }
-
 }
 
 Private_HandleUIEvents();
@@ -168,9 +172,9 @@ Effects::ProcessEffectEventsLoop();
 ***Match_InitMap***
 ***
 CleanUp();
-
 declare netwrite Integer Net_RaceLapNb for Teams[0];
 Net_RaceLapNb = Race::GetLapsNb();
+
 ***
 
 ***Match_InitMatch***

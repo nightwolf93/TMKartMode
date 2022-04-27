@@ -1,0 +1,89 @@
+//#RequireContext CSmMode
+
+
+Void SetStatus(CSmPlayer Player, Boolean Status) {
+    declare CUIConfig UI = UIManager.GetUI(Player);
+    declare netwrite Boolean Net_TMKart_InksplatStatus for UI;
+    declare netwrite Integer Net_TMKart_InksplatUpdate for UI = -1;
+    Net_TMKart_InksplatStatus = Status;
+    Net_TMKart_InksplatUpdate = Now;
+}
+
+
+Text GetManialink() {
+    //#RequireContext CSmMlScriptIngame
+
+    return """
+    <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+    <manialink version="3">
+    <frame id="Splatter">
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    </frame>
+
+    <script><!--
+    #Include "MathLib" as Math
+    declare CAudioSource SplatSfx;
+
+    Void EnableSplat() {
+        declare CMlFrame Frame = Page.GetFirstChild("Splatter") as CMlFrame;
+        declare Vec2[] pos;
+        foreach (i => Elem in Frame.Controls) {
+            declare CMlQuad Quad = Elem as CMlQuad;
+            declare newPos = <Math::Rand(-8, 8)*20., Math::Rand(-5, 5)*18.>;
+            while (True) {
+                if (pos.exists(newPos)) {
+                    newPos = <Math::Rand(-8, 8)*20., Math::Rand(-5, 5)*18.>;
+                } else {
+                    pos.add(newPos);
+                    break;
+                }
+            }
+            Quad.RelativePosition_V3 = newPos;
+            Quad.RelativeRotation = Math::Rand(0., 5.)*15;
+            Quad.Scale = 2.5;
+            AnimMgr.Add(Quad, "<elem opacity=\"1\" />", Now + i*250, 1000, CAnimManager::EAnimManagerEasing::CircIn);
+        }
+        SplatSfx.Play();
+    }
+
+
+
+
+    Void DisableSplat() {
+        declare CMlFrame Frame = Page.GetFirstChild("Splatter") as CMlFrame;
+        foreach (i => Elem in Frame.Controls) {
+            AnimMgr.Add(Elem, "<elem opacity=\"0\" />", Now + (Frame.Controls.count - i)*250, 1000, CAnimManager::EAnimManagerEasing::CircOut);
+        }
+    }
+
+
+    main() {
+        wait(UI != Null);
+        declare netread Boolean Net_TMKart_InksplatStatus for UI;
+        declare netread Integer Net_TMKart_InksplatUpdate for UI = -1;
+        declare Integer LastUpdate;
+        SplatSfx = Audio.CreateSound("https://cdn.discordapp.com/attachments/934577399033647104/968984484735221780/ink_splash_sfx.ogg", 0., False, False, False);
+        while(True) {
+            yield;
+            if (Net_TMKart_InksplatUpdate > LastUpdate) {
+                LastUpdate = Net_TMKart_InksplatUpdate;
+                if (Net_TMKart_InksplatStatus) {
+                    EnableSplat();
+                }
+                else {
+                    DisableSplat();
+                }
+            }
+        }
+    }
+
+
+    --></script>
+    </manialink>
+    """;
+}
