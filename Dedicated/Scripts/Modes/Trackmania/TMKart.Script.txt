@@ -28,10 +28,13 @@
 declare Effects::K_BoxEffect[Text] PlayersAvilEffectList;
 declare K_SlotPlayerUI[Text] PlayersUI;
 
+
 Void SyncPlayerAvilEffectWithUI(CSmPlayer _player) {
     declare Effects::K_BoxEffect PlayerAvilEffect = PlayersAvilEffectList[_player.User.Login];
     declare netwrite Text Net_PlayerAvilEffectName for _player;
+    declare netwrite Text Net_PlayerAvilEffectImage for _player;
     Net_PlayerAvilEffectName = PlayerAvilEffect.Name;
+    Net_PlayerAvilEffectImage = PlayerAvilEffect.ImageURL;
 }
 
 Void SetPlayerAvilEffect(CSmPlayer _player, Integer _effectIndex) {
@@ -165,6 +168,9 @@ Effects::ProcessEffectEventsLoop();
 ***Match_InitMap***
 ***
 CleanUp();
+
+declare netwrite Integer Net_RaceLapNb for Teams[0];
+Net_RaceLapNb = Race::GetLapsNb();
 ***
 
 ***Match_InitMatch***

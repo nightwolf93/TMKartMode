@@ -4,10 +4,23 @@
 Text GetManialink() {
     return """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
     <manialink version="3">
-		<frame id="Window" hidden="0">
-            <quad id="TitleBackground" pos="0 80" z-index="2" valign="top" halign="center" size="70 8" style="Bgs1" substyle="BgWindow2" opacity="0.9" />
-            <label id="Title" pos="0 78.5" z-index="3" textcolor="FFF" valign="top" halign="center" style="TextValueSmallSm" text="text"/>
-		</frame>
+        <frame pos="115 -55">
+            <label id="RankText" pos="20.5 -4.58" z-index="0" size="40 10.5" text="0/32" halign="center" textsize="7" valign="center" style="TextButtonNavBack"/>
+            <quad pos="0 0" z-index="0" size="40 10.7" bgcolor="000" opacity="0.7"/>
+        </frame>
+        <frame pos="115 -42">
+            <label id="CurrentTimeText" pos="20.5 -4.58" z-index="0" size="40 10.5" text="00:00.00" halign="center" textsize="4" valign="center" style="TextButtonNav"/>
+            <quad pos="0 0" z-index="0" size="40 10.7" bgcolor="000" opacity="0.7"/>
+        </frame>
+        <frame pos="-12.5 85">
+            <quad id="EffectImage" pos="2.5 -2.5" z-index="0" size="20 20" opacity="1" image="https://oyster.ignimgs.com/mediawiki/apis.ign.com/mario-kart-for-wii-u/d/d7/Mk8item14.png?width=1280"/>
+            <quad pos="0 0" z-index="0" size="25 25" bgcolor="000" opacity="0.7"/>
+        </frame>
+        <frame pos="115 -29">
+            <label pos="6.17 -4.91" z-index="0" size="10 10.5" text="🏁" halign="center" textsize="4" valign="center" style="TextButtonNav"/>
+            <label id="LapText" pos="25.7 -4.58" z-index="0" size="29.7 10.5" text="1/3" halign="center" textsize="4" valign="center" style="TextButtonNav"/>
+            <quad pos="0 0" z-index="0" size="40 10.7" bgcolor="000" opacity="0.7"/>
+        </frame>
 		<script><!--
 			#Include "TextLib" as TextLib
 			#Include "MathLib" as MathLib
@@ -18,17 +31,37 @@ Text GetManialink() {
 
 			main()
 			{
-				declare CMlFrame Window = (Page.GetFirstChild("Window") as CMlFrame);
-                Window.Visible = True;
-                declare CMlLabel Title = (Page.GetFirstChild("Title") as CMlLabel);
-                Title.SetText("No Item");
-                declare CMlMediaPlayer  VideoTransition <=> (Page.GetFirstChild("VideoTransitionBrowseTracks") as CMlMediaPlayer);
+                declare CMlLabel LapTextLabel = (Page.GetFirstChild("LapText") as CMlLabel);
+                declare CMlLabel RankTextLabel = (Page.GetFirstChild("RankText") as CMlLabel);
+                declare CMlLabel CurrentTimeTextLabel = (Page.GetFirstChild("CurrentTimeText") as CMlLabel);
+                declare CMlQuad EffectImageQuad = (Page.GetFirstChild("EffectImage") as CMlQuad);
 
                 while(True)
                 {
-                    if(InputPlayer != Null) {
+                    declare netread Integer Net_RaceLapNb for Teams[0];
+
+                    if(InputPlayer != Null && GUIPlayer != Null) {
+                        LapTextLabel.SetText(TextLib::Compose("$<%1$>/$<%2$>", TextLib::ToText(GUIPlayer.CurrentLapNumber + 1), TextLib::ToText(Net_RaceLapNb)));
+                        if(TextLib::StartsWith("0", GUIPlayer.Dossard)) {
+                            RankTextLabel.SetText(TextLib::Compose("$<%1$>/$<%2$>", TextLib::SubString(GUIPlayer.Dossard, 1 , 1), TextLib::ToText(Players.count)));
+                        } else {
+                            RankTextLabel.SetText(TextLib::Compose("$<%1$>/$<%2$>", GUIPlayer.Dossard, TextLib::ToText(Players.count)));
+                        }
+
+                        // Update lap time
+                        if(GUIPlayer.CurrentLapTime < 0) {
+                            CurrentTimeTextLabel.TextColor = <1.0, 0.5, 0.0>;
+                            CurrentTimeTextLabel.SetText(TextLib::TimeToText(GUIPlayer.CurrentLapTime, True, True));
+                        }
+                        else {
+                            CurrentTimeTextLabel.TextColor = <1.0, 1.0, 1.0>;
+                            CurrentTimeTextLabel.SetText(TextLib::TimeToText(GUIPlayer.CurrentLapTime, True, True));
+                        }
+
                         declare netread Text Net_PlayerAvilEffectName for InputPlayer;
-                        Title.SetText(Net_PlayerAvilEffectName);
+                        declare netread Text Net_PlayerAvilEffectImage for InputPlayer;
+                        EffectImageQuad.ImageUrl = Net_PlayerAvilEffectImage;
+                        //Title.SetText(Net_PlayerAvilEffectName);
                         foreach (Event in PendingEvents) {
                             if (Event.Type == CMlScriptEvent::Type::KeyPress) {
                                 switch(Event.KeyCode) {

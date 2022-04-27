@@ -17,6 +17,7 @@
     Text        TargetMode;
     Integer     Duration;
     Text        Function;
+    Text        ImageURL;
 }
 
 #Struct K_BoxEffectOnPlayer {
@@ -48,6 +49,7 @@ Void InitEffects() {
     NoneEffect.Marker     = "e_none";
     NoneEffect.TargetMode = "none";
     NoneEffect.Duration   = 0;
+    NoneEffect.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911908595961876/nothing.png";
     EffectsList.add(NoneEffect);
 
     // Thunder // NoEngine
@@ -57,6 +59,7 @@ Void InitEffects() {
     Thunder.Function   = "SetPlayer_Delayed_NoEngine";
     Thunder.TargetMode = "nearest";
     Thunder.Duration   = 5000;
+    Thunder.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968907448045948938/thunder.png";
     EffectsList.add(Thunder);
 
     // CruiseControlAll
@@ -65,6 +68,7 @@ Void InitEffects() {
     ForceCruiseControlAll.Marker     = "e_cruise_all";
     ForceCruiseControlAll.TargetMode = "nearest";
     ForceCruiseControlAll.Duration   = 3500;
+    ForceCruiseControlAll.ImageURL = "https://cdn.discordapp.com/attachments/934577399033647104/968908512602255370/cruisecontrol.png";
     EffectsList.add(ForceCruiseControlAll);
 
     // Turbo
@@ -73,6 +77,7 @@ Void InitEffects() {
     Turbo.Marker     = "e_turbo_self";
     Turbo.TargetMode = "self";
     Turbo.Duration   = 2500;
+    Turbo.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968909707366506496/boost1.png";
     EffectsList.add(Turbo);
 
     // Turbo2
@@ -81,6 +86,7 @@ Void InitEffects() {
     SuperTurbo.Marker     = "e_turbo2_self";
     SuperTurbo.TargetMode = "self";
     SuperTurbo.Duration   = 2500;
+    SuperTurbo.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968909881287516210/boost2.png";
     EffectsList.add(SuperTurbo);
 
     // Fragile
@@ -89,6 +95,7 @@ Void InitEffects() {
     Fragile.Marker     = "e_fragile";
     Fragile.TargetMode = "nearest";
     Fragile.Duration   = 10000;
+    Fragile.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968910304090148905/fragile.png";
     EffectsList.add(Fragile);
 
     // NoBrake
@@ -97,6 +104,7 @@ Void InitEffects() {
     NoBrake.Marker     = "e_nobrake";
     NoBrake.TargetMode = "nearest";
     NoBrake.Duration   = 5000;
+    NoBrake.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968910570763984947/nobrake.png";
     EffectsList.add(NoBrake);
 
     // LowGravity
@@ -105,6 +113,7 @@ Void InitEffects() {
     LowGravity.Marker   = "e_low_gravity";
     LowGravity.TargetMode   = "nearest";
     LowGravity.Duration   = 5000;
+    LowGravity.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911201918668810/lowgravity.png";
     EffectsList.add(LowGravity);
 
     // SlowMo
@@ -113,6 +122,7 @@ Void InitEffects() {
     SlowMo.Marker   = "e_slowmo";
     SlowMo.TargetMode   = "nearest";
     SlowMo.Duration   = 2500;
+    SlowMo.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911442105479228/slowmo.png";
     EffectsList.add(SlowMo);
 
     // Yeet
@@ -121,6 +131,7 @@ Void InitEffects() {
     Yeet.Marker   = "e_turbo2_self";
     Yeet.TargetMode   = "nearest";
     Yeet.Duration   = 3000;
+    Yeet.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911657126473728/yeet.png";
     EffectsList.add(Yeet);
 }
 
