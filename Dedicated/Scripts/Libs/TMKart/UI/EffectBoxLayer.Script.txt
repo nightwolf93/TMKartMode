@@ -1,4 +1,5 @@
-//#RequireContext CMlScriptIngame
+// #RequireContext CSmMlScriptIngame
+
 #Const C_ActivateEffectEvent_Type	"activated"
 
 Text GetManialink() {
@@ -72,7 +73,7 @@ Text GetManialink() {
                                 }
                             }
                         }
-                        
+
                         if (Input.PendingEvents.count > 0) {
                         	if(Input.PendingEvents[0].Pad.Type != CInputPad::EPadType::Keyboard) {
                                 foreach (Event in Input.PendingEvents) {

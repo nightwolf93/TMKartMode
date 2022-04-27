@@ -1,11 +1,9 @@
 // #RequireContext CSmMode
-
 #Include "MathLib" as MathLib
 #Include "TextLib" as TextLib
 
-#Const C_TargetMode_Self            "self"
-#Const C_TargetMode_Nearest         "nearest"
-#Const C_TargetMode_None            "none"
+#Include "Libs/Nadeo/ModeLibs/Legacy/Layers2.Script.txt" as Layers
+#Include "Libs/TMKart/UI/EffectInkSplats.Script.txt" as InkSplats
 
 /////////////
 // Structs //
@@ -109,8 +107,8 @@ Void InitEffects() {
 
     // LowGravity
     declare K_BoxEffect LowGravity;
-    LowGravity.Name     = "Low Gravity";
-    LowGravity.Marker   = "e_low_gravity";
+    LowGravity.Name         = "Low Gravity";
+    LowGravity.Marker       = "e_low_gravity";
     LowGravity.TargetMode   = "nearest";
     LowGravity.Duration   = 5000;
     LowGravity.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911201918668810/lowgravity.png";
@@ -118,8 +116,8 @@ Void InitEffects() {
 
     // SlowMo
     declare K_BoxEffect SlowMo;
-    SlowMo.Name     = "Slow Motion";
-    SlowMo.Marker   = "e_slowmo";
+    SlowMo.Name         = "Slow Motion";
+    SlowMo.Marker       = "e_slowmo";
     SlowMo.TargetMode   = "nearest";
     SlowMo.Duration   = 2500;
     SlowMo.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911442105479228/slowmo.png";
@@ -133,6 +131,19 @@ Void InitEffects() {
     Yeet.Duration   = 3000;
     Yeet.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911657126473728/yeet.png";
     EffectsList.add(Yeet);
+
+    // Ink Splats
+    declare K_BoxEffect InkSplats;
+    InkSplats.Name           = "Ink Splats";
+    InkSplats.Marker         = "e_ink_splats";
+    InkSplats.TargetMode     = "nearest";
+    InkSplats.ImageURL       = "https://cdn.discordapp.com/attachments/934577399033647104/968988325677522954/ink_icon.png";
+    InkSplats.Duration       = 5000;
+    EffectsList.add(InkSplats);
+
+    Layers::Create("InkSplats", InkSplats::GetManialink());
+    Layers::SetType("InkSplats", CUILayer::EUILayerType::Normal);
+    Layers::Attach("InkSplats");
 }
 
 K_BoxEffect GetRandomEffect() {
@@ -140,7 +151,9 @@ K_BoxEffect GetRandomEffect() {
 }
 
 Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
+    // check if player effect are full, if so don't try to apply more...
     if (SetPlayer_DelayedIsFull(Player)) return;
+
     switch(Effect.Marker) {
         case "e_thunder": {
             SetPlayer_Delayed_NoEngine(Player, True);
@@ -166,7 +179,12 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
         case "e_slowmo": {
             SetPlayer_Delayed_SlowMotion(Player, True);
         }
+        case "e_ink_splats":
+        {
+            InkSplats::SetStatus(Player, True);
+        }
     }
+
     declare K_BoxEffectOnPlayer EffectOnPlayer;
     EffectOnPlayer.Effect = Effect;
     EffectOnPlayer.StartAt = Now;
@@ -202,6 +220,10 @@ Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
             }
             case "e_slowmo": {
                 SetPlayer_Delayed_SlowMotion(_effectOnPlayer.Player, False);
+            }
+            case "e_ink_splats":
+            {
+                InkSplats::SetStatus(_effectOnPlayer.Player, False);
             }
         }
         UIManager.GetUI(_effectOnPlayer.Player).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Effect $<%1$> cleared", _effectOnPlayer.Effect.Name));
