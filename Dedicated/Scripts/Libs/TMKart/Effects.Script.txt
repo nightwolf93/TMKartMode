@@ -1,6 +1,11 @@
+// #RequireContext CSmMode
+
 #Include "MathLib" as MathLib
 #Include "TextLib" as TextLib
-#Include "ColorLib"
+
+#Const C_TargetMode_Self            "self"
+#Const C_TargetMode_Nearest         "nearest"
+#Const C_TargetMode_None            "none"
 
 /////////////
 // Structs //
@@ -124,6 +129,7 @@ K_BoxEffect GetRandomEffect() {
 }
 
 Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
+    if (SetPlayer_DelayedIsFull(Player)) return;
     switch(Effect.Marker) {
         case "e_thunder": {
             SetPlayer_Delayed_NoEngine(Player, True);
@@ -156,6 +162,7 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
     EffectOnPlayer.EndAt = EffectOnPlayer.StartAt + Effect.Duration;
     EffectOnPlayer.Player = Player;
     EffectsOnPlayerList[TextLib::ToText(EffectOnPlayer.StartAt)] = EffectOnPlayer;
+
 }
 
 Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
@@ -170,7 +177,7 @@ Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
             case "e_turbo_self": {
                 SetPlayer_Delayed_BoostUp(_effectOnPlayer.Player, False);
             }
-             case "e_turbo2_self": {
+            case "e_turbo2_self": {
                 SetPlayer_Delayed_Boost2Up(_effectOnPlayer.Player, False);
             }
             case "e_fragile": {

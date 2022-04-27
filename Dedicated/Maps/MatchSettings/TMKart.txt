@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<playlist>
+	<gameinfos>
+		<game_mode>0</game_mode>
+		<script_name>Trackmania/TMKart</script_name>
+	</gameinfos>
+
+	<startindex>0</startindex>
+	<map><file>Campaigns/CurrentQuarterly/Spring 2022 - 01.Map.Gbx</file></map>
+	<map><file>Campaigns/CurrentQuarterly/Spring 2022 - 02.Map.Gbx</file></map>
+	<map><file>Campaigns/CurrentQuarterly/Spring 2022 - 03.Map.Gbx</file></map>
+	<map><file>Campaigns/CurrentQuarterly/Spring 2022 - 04.Map.Gbx</file></map>
+	<map><file>Campaigns/CurrentQuarterly/Spring 2022 - 05.Map.Gbx</file></map>
+</playlist>
+
+
+

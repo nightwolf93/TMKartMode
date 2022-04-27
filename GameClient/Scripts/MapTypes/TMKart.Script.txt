@@ -1,0 +1,261 @@
+/**
+*	Trackmania TMKart Maptype
+*		bases heavily on TM_Race
+*
+*	Adds support for custom tags, mainly for PowerUps.
+*
+*	Map ruleset:
+* 	--------------
+*	- Only one Start.
+*	- Any number of Finish.
+*	- Any number of Checkpoint.
+*			OR
+*	- Only one multilaps Start
+*	- Any number of Finish
+*	- At least one Checkpoint
+*/
+#RequireContext CSmMapType
+#Const Version "2021-04-16"
+#Const C_MapTypeVersion 1
+#Const ScriptName "MapTypes/TrackMania/TM_Race.Script.txt"
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// Libraries
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+#Include "Libs/Nadeo/ModeLibs/Legacy/MapType.Script.txt" as MapType
+#Include "Libs/Nadeo/TMxSM/Race/Landmark.Script.txt" as Landmark
+#Include "Libs/Nadeo/TMxSM/Race/MapSet.Script.txt" as MapSet
+#Include "Libs/Nadeo/TMxSM/Race/MapGet.Script.txt" as MapGet
+#Include "Modes/TrackMania/TM_RaceTest_Local.Script.txt" as RaceTest
+#Include "Libs/Nadeo/TMNext/TrackMania/Stores/ClubStore.Script.txt" as ClubStore
+#Include "Libs/Nadeo/TMNext/TrackMania/Structures/ClubStruct.Script.txt" as ClubStruct
+#Include "Libs/Nadeo/CommonLibs/Common/ReportContext.Script.txt" as ReportContext
+#Include "Libs/Nadeo/TMNext/TrackMania/Editor/MapType.Script.txt" as TMMapType
+#Include "Libs/Nadeo/TMNext/MapEditor/PlayMapAtSave.Script.txt" as PlayMapAtSave
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// Constants
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+#Const C_EnablePlayMapAtSave True
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// Functions
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+/// Check if the map is valid
+Void Private_UpdateValidability() {
+	declare Integer StartsFinishes = 0;
+	declare Integer Starts = 0;
+	declare Integer Finishes = 0;
+	declare Integer Checkpoints = 0;
+	declare Integer[] CheckpointGroups = [];
+	declare Text[] LandmarkTypes = Landmark::C_Types;
+
+	foreach (Anchor in AnchorData) {
+		if (Anchor.WaypointType != CAnchorData::EWaypointType::None) {
+			switch (Anchor.WaypointType) {
+				case CAnchorData::EWaypointType::StartFinish: StartsFinishes += 1;
+				case CAnchorData::EWaypointType::Start: {
+					if (Anchor.Tag == Anchor.DefaultTag) {
+						Starts += 1;
+					}
+				}
+				case CAnchorData::EWaypointType::Finish: Finishes += 1;
+				case CAnchorData::EWaypointType::Checkpoint: {
+					if (Anchor.Tag == Landmark::C_Type_LinkedCheckpoint) {
+						if (!CheckpointGroups.exists(Anchor.Order)) {
+							CheckpointGroups.add(Anchor.Order);
+						}
+					} else {
+						Checkpoints += 1;
+					}
+				}
+			}
+		} else {
+			switch (Anchor.Tag) {
+				case Landmark::C_Type_Start: Starts += 1;
+				case Landmark::C_Type_Finish: Finishes += 1;
+				case Landmark::C_Type_Checkpoint: Checkpoints += 1;
+				case Landmark::C_Type_LinkedCheckpoint: {
+					if (!CheckpointGroups.exists(Anchor.Order)) {
+						CheckpointGroups.add(Anchor.Order);
+					}
+				}
+				case Landmark::C_Type_Multilap: StartsFinishes += 1;
+			}
+		}
+	}
+
+	Checkpoints += CheckpointGroups.count;
+
+	// It's a multilap
+	if (StartsFinishes > 0) {
+		// No start line block, so there must be exactly one multilap block, so that we know where the car will spawn.
+		if (Starts == 0 && StartsFinishes > 1) {
+			ValidationStatus = CMapType::ValidationStatus::NotValidable;
+			//L16N [MapEditor] Message explaining to the player that a track can contain only one start line block.
+			ValidabilityRequirementsMessage = _("You can place only one starting point!");
+			return;
+		}
+		// A start line block may be present: in that case the car will spawn on it, and not on the multilap block.
+		// But there must be only one start line block (and there could be more than one multilap block).
+		if (Starts > 1) {
+			ValidationStatus = CMapType::ValidationStatus::NotValidable;
+			//L16N [MapEditor] Message explaining to the player that a track can contain only one start line block.
+			ValidabilityRequirementsMessage = _("You can place only one starting point!");
+			return;
+		}
+		// Has at least one checkpoint
+		if (Checkpoints < 1) {
+			ValidationStatus = CMapType::ValidationStatus::NotValidable;
+			//L16N [MapEditor] Message explaining to the player that a track has to contain at least one checkpoint block.
+			ValidabilityRequirementsMessage = _("You must place at least one checkpoint!");
+			return;
+		}
+	}
+	// It's a simple race
+	else {
+		// Exactly one start
+		if (Starts <= 0) {
+			ValidationStatus = CMapType::ValidationStatus::NotValidable;
+			//L16N [MapEditor] Message explaining to the player that a track has to contain exactly one start line block.
+			ValidabilityRequirementsMessage = _("You need to place a starting point!");
+			return;
+		}
+		if (Starts >= 2) {
+			ValidationStatus = CMapType::ValidationStatus::NotValidable;
+			//L16N [MapEditor] Message explaining to the player that a track can contain only one start line block.
+			ValidabilityRequirementsMessage = _("You can place only one starting point!");
+			return;
+		}
+		// At least one finish
+		if (Finishes < 1) {
+			ValidationStatus = CMapType::ValidationStatus::NotValidable;
+			//L16N [MapEditor] Message explaining to the player that a track has to contain at least one finish line block.
+			ValidabilityRequirementsMessage = _("You must place at least one finish line!");
+			return;
+		}
+	}
+
+	// If the objectives times are not valid, the author must revalidate their map
+	if (!MapType::ObjectivesAreValid()) {
+		ValidationStatus = CMapType::ValidationStatus::Validable;
+		return;
+	}
+
+	ValidationStatus = CMapType::ValidationStatus::Validated;
+}
+Void UpdateValidability() {
+	Private_UpdateValidability();
+	if (ValidationStatus != CMapType::ValidationStatus::Validated) {
+		MapType::ResetObjectives();
+		MapSet::ResetAuthorRaceWaypointTimes();
+		// Delete author ghost of race validation
+		declare Ident Map_AuthorGhostId = MapGet::GetAuthorGhostId();
+		if (Map_AuthorGhostId != NullId) {
+			if (DataFileMgr.Ghosts.existskey(Map_AuthorGhostId)) DataFileMgr.Ghost_Release(Map_AuthorGhostId);
+			MapGet::ShareAuthorGhostId(NullId);
+		}
+		SetAuthorTimeAndGhost(Null);
+	}
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+/** Start playing from a start or checkpoint
+*	with no validation
+*/
+Void PlayTestRun() {
+	TMMapType::PlayTestRun_Yield();
+	ReportContext::SetContext(System, ReportContext::C_Context_MapEditor);
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+/** Do a full run of the race to validate
+*	it and register an author time
+*/
+Void PlayValidationRun() {
+	TMMapType::PlayValidationRun_Yield("TrackMania/TM_RaceValidation_Local");
+
+	ReportContext::SetContext(System, ReportContext::C_Context_MapEditor);
+
+	declare NewAuthorTime = MapGet::GetSharedAuthorTime();
+	// Check author time in Map and not MapInfo. MapInfo is updated only when the map is saved.
+	// Update the medals times only if the new validation time is better
+	if (NewAuthorTime >= 0 && (NewAuthorTime < Map.TMObjective_AuthorTime || Map.TMObjective_AuthorTime < 0)) {
+		// For some reason the C++ reset the medals times to -1
+		// if we update the validation status and author time
+		// after the validation.
+		// To counter this behaviour we unvalidate the map, sleep
+		// to let the C++ reset the medal times and update the
+		// author time afterward
+		MapType::ResetObjectives();
+		ValidationStatus = CMapType::ValidationStatus::NotValidable;
+		yield;
+		MapType::SetObjectivesFromAuthorTime(NewAuthorTime);
+
+		// Save author's ghost in the map (will also override the author validation time)
+		declare Ident NewAuthorGhostId = MapGet::GetAuthorGhostId();
+		if (NewAuthorGhostId != NullId && Mode.DataFileMgr.Ghosts.existskey(NewAuthorGhostId)) {
+			SetAuthorTimeAndGhost(Mode.DataFileMgr.Ghosts[NewAuthorGhostId]);
+		}
+
+		declare AuthorRaceWaypointTimes = MapGet::GetSharedAuthorRaceWaypointTimes();
+		if (AuthorRaceWaypointTimes.count > 0) {
+			MapSet::SetAuthorRaceWaypointTimes(AuthorRaceWaypointTimes);
+		}
+	}
+
+	UpdateValidability();
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// Main
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+main() {
+	HoldLoadingScreen = True;
+	ReportContext::SetContext(System, ReportContext::C_Context_MapEditor);
+	TMMapType::ApplyDecoImages();
+	PlayMapAtSave::Enable(Map, C_EnablePlayMapAtSave);
+
+	// Reload author validation ghost
+	// Do it before calling UpdateValidability()
+	// because it will make sure that the ghost
+	// is reset if the map is not valid anymore
+	if (MapGet::GetAuthorGhostId() == NullId) {
+		// Reload ghost from the map
+		declare CGhost AuthorGhost = Mode.DataFileMgr.Map_GetAuthorGhost(Map);
+		if (AuthorGhost != Null) {
+			MapGet::ShareAuthorGhostId(AuthorGhost.Id);
+		}
+	}
+
+	MapType::SetVersion(C_MapTypeVersion);
+	UpdateValidability();
+
+	HoldLoadingScreen = False;
+
+	EnableMapTypeStartTest = True;	// declare that the script will take care of 'StartTest' event.
+	CustomEditAnchorData = False;
+
+	while (True) {
+		yield;
+
+		foreach(Event in PendingEvents) {
+			switch(Event.Type) {
+				case CMapEditorPluginEvent::Type::MapModified: {
+					UpdateValidability();
+					RaceTest::RemoveGhost();
+				}
+				case CMapEditorPluginEvent::Type::EditObjectives: {
+					DisplayDefaultSetObjectivesDialog();
+				}
+				case CMapEditorPluginEvent::Type::StartValidation: {
+					PlayValidationRun();
+				}
+				case CMapEditorPluginEvent::Type::StartTest: {
+					PlayTestRun();
+				}
+			}
+		}
+	}
+}
