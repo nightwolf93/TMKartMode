@@ -16,12 +16,12 @@ Text GetManialink() {
     <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
     <manialink version="3">
     <frame id="Splatter">
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
     </frame>
 
     <script><!--
@@ -60,23 +60,29 @@ Text GetManialink() {
         }
     }
 
-
     main() {
         wait(GUIPlayer != Null);
         declare netread Boolean Net_TMKart_InksplatStatus for GUIPlayer;
         declare netread Integer Net_TMKart_InksplatUpdate for GUIPlayer = -1;
         declare Integer LastUpdate;
+        declare Boolean TestValue;
         SplatSfx = Audio.CreateSound("https://cdn.discordapp.com/attachments/934577399033647104/968984484735221780/ink_splash_sfx.ogg", 0., False, False, False);
         while(True) {
             yield;
+
             if (Net_TMKart_InksplatUpdate > LastUpdate) {
                 LastUpdate = Net_TMKart_InksplatUpdate;
-                if (Net_TMKart_InksplatStatus) {
+                TestValue = Net_TMKart_InksplatStatus;
+                if (TestValue) {
                     EnableSplat();
                 }
                 else {
                     DisableSplat();
                 }
+            }
+            if (TestValue && Now > (LastUpdate + 20000)) {
+                TestValue = False;
+                DisableSplat();
             }
         }
     }

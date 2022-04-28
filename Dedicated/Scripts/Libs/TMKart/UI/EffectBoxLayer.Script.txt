@@ -10,6 +10,7 @@
     Integer     Duration;
     Text        Function;
     Text        ImageURL;
+    Text        Color;
 }
 
 Text Private_GenEffects(K_BoxEffect[] EffectList) {
@@ -97,7 +98,7 @@ Text GetManialink(K_BoxEffect[] EffectList) {
     {
         wait(GUIPlayer != Null);
         declare LastEffectName = "";
-        declare netread Text Net_PlayerAvilEffectMarker for GUIPlayer;
+        declare netread Text Net_PlayerAvilEffectMarker for GUIPlayer = "None";
         declare Integer Key = 33;
         G_Sfx = Audio.CreateSound("https://cdn.discordapp.com/attachments/934577399033647104/969235965719760936/roulette_sfx2.ogg");
         while(True)
@@ -106,7 +107,7 @@ Text GetManialink(K_BoxEffect[] EffectList) {
 
             if (LastEffectName != Net_PlayerAvilEffectMarker) {
                 LastEffectName = Net_PlayerAvilEffectMarker;
-                if (Net_PlayerAvilEffectMarker == "None") {
+                if (Net_PlayerAvilEffectMarker == "" || Net_PlayerAvilEffectMarker == "None") {
                     SetActiveEffect("None");
                 } else {
                     CarouselActiveEffect(Net_PlayerAvilEffectMarker);
