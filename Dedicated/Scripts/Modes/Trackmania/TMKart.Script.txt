@@ -1,5 +1,5 @@
 //#RequireContext CSmMode
-#Extends "Modes/TrackMania/TM_Cup_Online.Script.txt"
+#Extends "Modes/TrackMania/TM_Rounds_Online.Script.txt"
 
 #Include "TextLib" as TextLib
 #Include "MathLib" as MathLib
@@ -10,6 +10,7 @@
 
 #Setting S_TrustClientSimu True
 #Setting S_UseCrudeExtrapolation False
+#Setting S_AutoSpecTimeout 300 as _("Idle Time before player is AutoSpeced")
 
 /////////////
 // Structs //
@@ -26,15 +27,21 @@ Void CleanUp() {
 
 ***Match_StartServer***
 ***
-
 UsePvECollisions = True;
 UsePvPCollisions = True;
 Effects::InitEffects();
-
 ***
 
 ***Match_PlayLoop***
 ***
+
+foreach (Player in Players) {
+    if (Player.IdleDuration >= S_AutoSpecTimeout * 1000 && S_AutoSpecTimeout >= 9 && Player.RequestsSpectate == False) {
+        ServerAdmin.ForceSpectator(Player.User, CServerAdmin::ESpecMode::SpectatorSelectable);
+        UIManager.GetUI(Player).SendChat("$z$ee0$s[$fffServer$ee0] You have been automatically sent to spectator.$z");
+    }
+}
+
 Effects::Yield();
 ***
 

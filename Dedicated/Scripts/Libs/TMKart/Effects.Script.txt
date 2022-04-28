@@ -1,4 +1,5 @@
-// #RequireContext CSmMode
+//#RequireContext CSmMode
+
 #Include "MathLib" as MathLib
 #Include "TextLib" as TextLib
 
@@ -28,7 +29,7 @@
     K_BoxEffect     Effect;
     Integer         StartAt;
     Integer         EndAt;
-    CSmPlayer       Player;
+    Text            Login;
 }
 
 ///////////
@@ -207,51 +208,53 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
     EffectOnPlayer.Effect = Effect;
     EffectOnPlayer.StartAt = Now;
     EffectOnPlayer.EndAt = EffectOnPlayer.StartAt + Effect.Duration;
-    EffectOnPlayer.Player = Player;
+    EffectOnPlayer.Login = Player.User.Login;
     G_EffectOnPlayer[TextLib::ToText(EffectOnPlayer.StartAt)] = EffectOnPlayer;
 
 }
 
 Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
-    if(_effectOnPlayer.Player != Null) {
-        switch(_effectOnPlayer.Effect.Marker) {
-            case "e_thunder": {
-                SetPlayer_Delayed_NoEngine(_effectOnPlayer.Player, False);
-            }
-            case "e_cruise_all": {
-                SetPlayer_Delayed_Cruise(_effectOnPlayer.Player, False, _effectOnPlayer.Player.Speed);
-            }
-            case "e_turbo_self": {
-                SetPlayer_Delayed_BoostUp(_effectOnPlayer.Player, False);
-            }
-            case "e_turbo2_self": {
-                SetPlayer_Delayed_Boost2Up(_effectOnPlayer.Player, False);
-            }
-            case "e_fragile": {
-                SetPlayer_Delayed_Fragile(_effectOnPlayer.Player, False);
-            }
-            case "e_nobrake": {
-                SetPlayer_Delayed_NoBrakes(_effectOnPlayer.Player, False);
-            }
-            case "e_low_gravity": {
-                SetPlayer_Delayed_GravityCoef(_effectOnPlayer.Player, 1.0);
-            }
-            case "e_slowmo": {
-                SetPlayer_Delayed_SlowMotion(_effectOnPlayer.Player, False);
-            }
-            case "e_ink_splats":
-            {
-                InkSplats::SetStatus(_effectOnPlayer.Player, False);
+    declare CSmPlayer Player = GetPlayer(_effectOnPlayer.Login);
+    if(Player != Null) {
+        if (Player.RequestsSpectate == False) {
+            switch(_effectOnPlayer.Effect.Marker) {
+                case "e_thunder": {
+                    SetPlayer_Delayed_NoEngine(Player, False);
+                }
+                case "e_cruise_all": {
+                    SetPlayer_Delayed_Cruise(Player, False, Player.Speed);
+                }
+                case "e_turbo_self": {
+                    SetPlayer_Delayed_BoostUp(Player, False);
+                }
+                case "e_turbo2_self": {
+                    SetPlayer_Delayed_Boost2Up(Player, False);
+                }
+                case "e_fragile": {
+                    SetPlayer_Delayed_Fragile(Player, False);
+                }
+                case "e_nobrake": {
+                    SetPlayer_Delayed_NoBrakes(Player, False);
+                }
+                case "e_low_gravity": {
+                    SetPlayer_Delayed_GravityCoef(Player, 1.0);
+                }
+                case "e_slowmo": {
+                    SetPlayer_Delayed_SlowMotion(Player, False);
+                }
             }
         }
-        UIManager.GetUI(_effectOnPlayer.Player).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Effect $<%1$> cleared", _effectOnPlayer.Effect.Name));
+        if (_effectOnPlayer.Effect.Marker == "e_ink_splats") {
+            InkSplats::SetStatus(Player, False);
+        }
+        UIManager.GetUI(Player).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Effect $<%1$> cleared", _effectOnPlayer.Effect.Name));
     }
     G_EffectOnPlayer.removekey(TextLib::ToText(_effectOnPlayer.StartAt));
 }
 
 Void ClearEffectOnPlayer(CSmPlayer Player) {
     foreach(EffectOnPlayer in G_EffectOnPlayer) {
-        if(EffectOnPlayer.Player.User.Login == Player.User.Login) {
+        if(EffectOnPlayer.Login == Player.User.Login) {
             UnActivateOnPlayer(EffectOnPlayer);
         }
     }

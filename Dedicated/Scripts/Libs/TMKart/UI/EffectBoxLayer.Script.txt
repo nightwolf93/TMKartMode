@@ -73,22 +73,20 @@ Text GetManialink(K_BoxEffect[] EffectList) {
             }
 
             foreach (Event in PendingEvents) {
-                if (Event.Type == CMlScriptEvent::Type::KeyPress &&
-                    Event.KeyCode == Key) {
+                if (Event.Type == CMlScriptEvent::Type::KeyPress &&Event.KeyCode == Key) {
+                    SendPlayerActivatedEffect();
+                }
+            }
+
+            foreach (Event in Input.PendingEvents) {
+                if (Event.Type == CInputEvent::EType::PadButtonPress) {
+                    if (Event.Button == CInputEvent::EButton::LeftStick) {
                         SendPlayerActivatedEffect();
                     }
                 }
             }
-
-            if (Input.PendingEvents.count > 0 && Input.PendingEvents[0].Pad.Type != CInputPad::EPadType::Keyboard) {
-                foreach (Event in Input.PendingEvents) {
-                    if (Event.Type == CInputEvent::EType::PadButtonPress &&
-                        Event.Button == CInputEvent::EButton::LeftStick) {
-                            SendPlayerActivatedEffect();
-                        }
-                    }
-                }
-            }
-            --></script>
-            </manialink>""";
         }
+    }
+    --></script>
+    </manialink>""";
+}
