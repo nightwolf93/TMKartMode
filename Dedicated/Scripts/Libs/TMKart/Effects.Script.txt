@@ -4,6 +4,8 @@
 #Include "TextLib" as TextLib
 
 #Include "Libs/Nadeo/ModeLibs/Legacy/Layers2.Script.txt" as Layers
+// #Include "Libs/Nadeo/TMxSM/Race/Race.Script.txt" as Race
+
 #Include "Libs/TMKart/UI/EffectInkSplats.Script.txt" as InkSplats
 #Include "Libs/TMKart/UI/EffectBoxLayer.Script.txt" as EffectBoxLayer
 #Include "Libs/TMKart/UI/GameUI.Script.txt" as GameUI
@@ -51,6 +53,30 @@ K_BoxEffect GetEffectByIndex(Integer Index) {
 
 K_BoxEffect GetRandomEffect() {
     return GetEffectByIndex(MathLib::Rand(1, G_EffectsList.count - 1));
+}
+
+Integer GetPlayerPosition(Text Login) {
+    declare CSmPlayer Player = GetPlayer(Login);
+    if (Player != Null) {
+        declare Text Dossard = TextLib::RegexReplace("^0", Player.Dossard, "", "");
+        return TextLib::ToInteger(Dossard);
+    }
+    return -1;
+}
+
+Integer GetPlayerPosition(CSmPlayer Player) {
+    return GetPlayerPosition(Player.User.Login);
+}
+
+
+CSmPlayer GetFirstPlayer() {
+    foreach (Player in Players) {
+        declare Text Dossard = TextLib::RegexReplace("^0", Player.Dossard, "", "");
+        if (TextLib::ToInteger(Dossard) == 1) {
+            return Player;
+        }
+    }
+    return Null;
 }
 
 Void InitEffects() {
@@ -247,7 +273,7 @@ Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
         if (_effectOnPlayer.Effect.Marker == "e_ink_splats") {
             InkSplats::SetStatus(Player, False);
         }
-        UIManager.GetUI(Player).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Effect $<%1$> cleared", _effectOnPlayer.Effect.Name));
+        // UIManager.GetUI(Player).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Effect $<%1$> cleared", _effectOnPlayer.Effect.Name));
     }
     G_EffectOnPlayer.removekey(TextLib::ToText(_effectOnPlayer.StartAt));
 }
@@ -302,19 +328,28 @@ Void OnPlayerActivedEffect(CSmPlayer CurrentPlayer) {
     if (!G_PlayerEffect.existskey(CurrentPlayer.User.Login)) return;
 
     declare K_BoxEffect AvilEffect = G_PlayerEffect[CurrentPlayer.User.Login];
-    log("trying to activate an effect");
+
     if (AvilEffect.Name != "None") {
         switch(AvilEffect.TargetMode) {
+
+            case "first": {
+                declare CSmPlayer Player = GetFirstPlayer();
+                if (Player != Null) {
+                    ActivateOnPlayer(Player, AvilEffect);
+                    SetPlayerAvilEffect(Player, 0);
+                }
+            }
+
             case "self": {
                 ActivateOnPlayer(CurrentPlayer, AvilEffect);
-                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Activated $<%1$> on you", AvilEffect.Name));
+                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, """Activated {{{ AvilEffect.Name }}} on you""");
                 SetPlayerAvilEffect(CurrentPlayer, 0);
             }
 
             case "nearest": {
                 declare CSmPlayer NearestPlayer = GetNearestPlayer(CurrentPlayer);
                 ActivateOnPlayer(NearestPlayer, AvilEffect);
-                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Activated $<%1$> on $<%2$>", AvilEffect.Name, NearestPlayer.User.Name));
+                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, """Activated {{{ AvilEffect.Name }}} on {{{ NearestPlayer.User.Name }}}""");
                 SetPlayerAvilEffect(CurrentPlayer, 0);
             }
 
@@ -324,7 +359,7 @@ Void OnPlayerActivedEffect(CSmPlayer CurrentPlayer) {
                         ActivateOnPlayer(Player, AvilEffect);
                     }
                 }
-                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Activated $<%1$> on everyone", AvilEffect.Name));
+                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, """Activated {{{ AvilEffect.Name }}} on everyone""");
                 SetPlayerAvilEffect(CurrentPlayer, 0);
             }
         }
@@ -344,6 +379,7 @@ Void Yield() {
 
     foreach (Event in PendingEvents) {
         if (Event.Type == CSmModeEvent::EType::OnPlayerTriggersWaypoint) {
+            if (Event.IsFinish) continue; // Don't assign finished player an effect
             GivePlayerRandomAvilEffect(Event.Player); // Try to assign a random effect to the player
         }
 
@@ -360,7 +396,6 @@ Void Yield() {
 
     foreach (UIEvent in UIManager.PendingEvents) {
         if(UIEvent.CustomEventType == "activate") {
-            log("got even from the player");
             declare CSmPlayer Player = GetPlayer(UIEvent.UI);
             if(Player == Null) continue;
             OnPlayerActivedEffect(Player);

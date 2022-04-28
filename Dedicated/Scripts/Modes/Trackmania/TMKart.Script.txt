@@ -21,10 +21,6 @@
 // Plugs //
 ///////////
 
-Void CleanUp() {
-    Effects::CleanUp();
-}
-
 ***Match_StartServer***
 ***
 UsePvECollisions = True;
@@ -47,18 +43,18 @@ Effects::Yield();
 
 ***Match_InitMap***
 ***
-CleanUp();
+Effects::CleanUp();
 GameUI::SyncLaps();
 ***
 
 ***Match_InitMatch***
 ***
-CleanUp();
+Effects::CleanUp();
 ***
 
 ***Match_InitRound***
 ***
-CleanUp();
+Effects::CleanUp();
 ***
 
 Void doNothing() {

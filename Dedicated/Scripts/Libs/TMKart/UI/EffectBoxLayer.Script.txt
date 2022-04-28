@@ -12,7 +12,6 @@
     Text        ImageURL;
 }
 
-
 Text Private_GenEffects(K_BoxEffect[] EffectList) {
     declare OutXml = """<frame id="Effects">""";
     foreach (i => Effect in EffectList) {
@@ -42,8 +41,9 @@ Text GetManialink(K_BoxEffect[] EffectList) {
     #Include "TextLib" as TextLib
     #Include "MathLib" as MathLib
 
+    declare CAudioSource G_Sfx;
+
     Void SendPlayerActivatedEffect() {
-        log("player clicked activation button");
         SendCustomEvent("activate", []);
     }
 
@@ -55,7 +55,43 @@ Text GetManialink(K_BoxEffect[] EffectList) {
         }
     }
 
+    Void SetEffect(Integer Number) {
+        declare CMlFrame Frame <=> (Page.GetFirstChild("Effects") as CMlFrame);
+        foreach (i => Elem in Frame.Controls) {
+            Elem.Hide();
+            if (i == Number) Elem.Show();
+        }
+    }
 
+
+    Void CarouselActiveEffect(Text Effect) {
+        declare Integer Interval = 200;
+        declare Integer TotalInterval = 0;
+        declare Integer Steps = 21;
+        declare Integer Counter = 0;
+        declare Integer StartTime = Now;
+        declare CMlFrame Frame <=> (Page.GetFirstChild("Effects") as CMlFrame);
+        declare Integer PrevIndex = -1;
+        SetActiveEffect("None");
+        G_Sfx.Play();
+        while (True) {
+            yield;
+            if (Now >= StartTime + TotalInterval) {
+                Interval = Counter  * 15;
+                TotalInterval += Interval;
+                declare rnd = MathLib::Rand(1, Frame.Controls.count-1);
+                if (rnd == PrevIndex) rnd = MathLib::Rand(1, Frame.Controls.count-1); // prevent duplicates
+                SetEffect(rnd);
+                PrevIndex = rnd;
+                Counter += 1;
+            }
+
+            if (Counter >= Steps)  {
+                SetActiveEffect(Effect);
+                break;
+            }
+        }
+    }
 
     main()
     {
@@ -63,13 +99,18 @@ Text GetManialink(K_BoxEffect[] EffectList) {
         declare LastEffectName = "";
         declare netread Text Net_PlayerAvilEffectMarker for GUIPlayer;
         declare Integer Key = 33;
+        G_Sfx = Audio.CreateSound("https://cdn.discordapp.com/attachments/934577399033647104/969235965719760936/roulette_sfx2.ogg");
         while(True)
         {
             yield;
 
             if (LastEffectName != Net_PlayerAvilEffectMarker) {
                 LastEffectName = Net_PlayerAvilEffectMarker;
-                SetActiveEffect(Net_PlayerAvilEffectMarker);
+                if (Net_PlayerAvilEffectMarker == "None") {
+                    SetActiveEffect("None");
+                } else {
+                    CarouselActiveEffect(Net_PlayerAvilEffectMarker);
+                }
             }
 
             foreach (Event in PendingEvents) {
