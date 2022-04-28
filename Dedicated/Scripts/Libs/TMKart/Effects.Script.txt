@@ -4,6 +4,9 @@
 
 #Include "Libs/Nadeo/ModeLibs/Legacy/Layers2.Script.txt" as Layers
 #Include "Libs/TMKart/UI/EffectInkSplats.Script.txt" as InkSplats
+#Include "Libs/TMKart/UI/EffectBoxLayer.Script.txt" as EffectBoxLayer
+#Include "Libs/TMKart/UI/GameUI.Script.txt" as GameUI
+
 
 /////////////
 // Structs //
@@ -29,15 +32,21 @@
 // Plugs //
 ///////////
 
-declare K_BoxEffect[] EffectsList;
-declare K_BoxEffectOnPlayer[Text] EffectsOnPlayerList;
+declare K_BoxEffect[] G_EffectsList;
+declare K_BoxEffectOnPlayer[Text] G_EffectOnPlayer;
+declare K_BoxEffect[Text] G_PlayerEffect;
 
 ///////////////
 // Functions //
 ///////////////
 
-K_BoxEffect GetByIndex(Integer Index) {
-    return EffectsList[Index];
+K_BoxEffect GetEffectByIndex(Integer Index) {
+    if (G_EffectsList.existskey(Index)) return G_EffectsList[Index];
+    return K_BoxEffect{};
+}
+
+K_BoxEffect GetRandomEffect() {
+    return GetEffectByIndex(MathLib::Rand(1, G_EffectsList.count - 1));
 }
 
 Void InitEffects() {
@@ -48,7 +57,7 @@ Void InitEffects() {
     NoneEffect.TargetMode = "none";
     NoneEffect.Duration   = 0;
     NoneEffect.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911908595961876/nothing.png";
-    EffectsList.add(NoneEffect);
+    G_EffectsList.add(NoneEffect);
 
     // Thunder // NoEngine
     declare K_BoxEffect Thunder;
@@ -58,7 +67,7 @@ Void InitEffects() {
     Thunder.TargetMode = "nearest";
     Thunder.Duration   = 5000;
     Thunder.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968907448045948938/thunder.png";
-    EffectsList.add(Thunder);
+    G_EffectsList.add(Thunder);
 
     // CruiseControlAll
     declare K_BoxEffect ForceCruiseControlAll;
@@ -67,7 +76,7 @@ Void InitEffects() {
     ForceCruiseControlAll.TargetMode = "nearest";
     ForceCruiseControlAll.Duration   = 3500;
     ForceCruiseControlAll.ImageURL = "https://cdn.discordapp.com/attachments/934577399033647104/968908512602255370/cruisecontrol.png";
-    EffectsList.add(ForceCruiseControlAll);
+    G_EffectsList.add(ForceCruiseControlAll);
 
     // Turbo
     declare K_BoxEffect Turbo;
@@ -76,7 +85,7 @@ Void InitEffects() {
     Turbo.TargetMode = "self";
     Turbo.Duration   = 2500;
     Turbo.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968909707366506496/boost1.png";
-    EffectsList.add(Turbo);
+    G_EffectsList.add(Turbo);
 
     // Turbo2
     declare K_BoxEffect SuperTurbo;
@@ -85,7 +94,7 @@ Void InitEffects() {
     SuperTurbo.TargetMode = "self";
     SuperTurbo.Duration   = 2500;
     SuperTurbo.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968909881287516210/boost2.png";
-    EffectsList.add(SuperTurbo);
+    G_EffectsList.add(SuperTurbo);
 
     // Fragile
     declare K_BoxEffect Fragile;
@@ -94,7 +103,7 @@ Void InitEffects() {
     Fragile.TargetMode = "nearest";
     Fragile.Duration   = 10000;
     Fragile.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968910304090148905/fragile.png";
-    EffectsList.add(Fragile);
+    G_EffectsList.add(Fragile);
 
     // NoBrake
     declare K_BoxEffect NoBrake;
@@ -103,7 +112,7 @@ Void InitEffects() {
     NoBrake.TargetMode = "nearest";
     NoBrake.Duration   = 5000;
     NoBrake.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968910570763984947/nobrake.png";
-    EffectsList.add(NoBrake);
+    G_EffectsList.add(NoBrake);
 
     // LowGravity
     declare K_BoxEffect LowGravity;
@@ -112,7 +121,7 @@ Void InitEffects() {
     LowGravity.TargetMode   = "nearest";
     LowGravity.Duration   = 5000;
     LowGravity.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911201918668810/lowgravity.png";
-    EffectsList.add(LowGravity);
+    G_EffectsList.add(LowGravity);
 
     // SlowMo
     declare K_BoxEffect SlowMo;
@@ -121,7 +130,7 @@ Void InitEffects() {
     SlowMo.TargetMode   = "nearest";
     SlowMo.Duration   = 2500;
     SlowMo.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911442105479228/slowmo.png";
-    EffectsList.add(SlowMo);
+    G_EffectsList.add(SlowMo);
 
     // Yeet
     declare K_BoxEffect Yeet;
@@ -130,7 +139,7 @@ Void InitEffects() {
     Yeet.TargetMode   = "nearest";
     Yeet.Duration   = 3000;
     Yeet.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911657126473728/yeet.png";
-    EffectsList.add(Yeet);
+    G_EffectsList.add(Yeet);
 
     // Ink Splats
     declare K_BoxEffect InkSplats;
@@ -139,15 +148,21 @@ Void InitEffects() {
     InkSplats.TargetMode     = "nearest";
     InkSplats.ImageURL       = "https://cdn.discordapp.com/attachments/934577399033647104/968988325677522954/ink_icon.png";
     InkSplats.Duration       = 5000;
-    EffectsList.add(InkSplats);
+    G_EffectsList.add(InkSplats);
 
     Layers::Create("InkSplats", InkSplats::GetManialink());
     Layers::SetType("InkSplats", CUILayer::EUILayerType::Normal);
     Layers::Attach("InkSplats");
-}
 
-K_BoxEffect GetRandomEffect() {
-    return EffectsList[MathLib::Rand(1, EffectsList.count - 1)];
+    Layers::Create("EffectBox", EffectBoxLayer::GetManialink(G_EffectsList));
+    Layers::SetType("EffectBox", CUILayer::EUILayerType::Normal);
+    Layers::Attach("EffectBox");
+
+    Layers::Create("GameUI", GameUI::GetManialink());
+    Layers::SetType("GameUI", CUILayer::EUILayerType::Normal);
+    Layers::Attach("GameUI");
+
+
 }
 
 Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
@@ -190,7 +205,7 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
     EffectOnPlayer.StartAt = Now;
     EffectOnPlayer.EndAt = EffectOnPlayer.StartAt + Effect.Duration;
     EffectOnPlayer.Player = Player;
-    EffectsOnPlayerList[TextLib::ToText(EffectOnPlayer.StartAt)] = EffectOnPlayer;
+    G_EffectOnPlayer[TextLib::ToText(EffectOnPlayer.StartAt)] = EffectOnPlayer;
 
 }
 
@@ -228,11 +243,11 @@ Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
         }
         UIManager.GetUI(_effectOnPlayer.Player).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Effect $<%1$> cleared", _effectOnPlayer.Effect.Name));
     }
-    EffectsOnPlayerList.removekey(TextLib::ToText(_effectOnPlayer.StartAt));
+    G_EffectOnPlayer.removekey(TextLib::ToText(_effectOnPlayer.StartAt));
 }
 
 Void ClearEffectOnPlayer(CSmPlayer Player) {
-    foreach(EffectOnPlayer in EffectsOnPlayerList) {
+    foreach(EffectOnPlayer in G_EffectOnPlayer) {
         if(EffectOnPlayer.Player.User.Login == Player.User.Login) {
             UnActivateOnPlayer(EffectOnPlayer);
         }
@@ -240,9 +255,114 @@ Void ClearEffectOnPlayer(CSmPlayer Player) {
     SetPlayer_Delayed_Reset(Player);
 }
 
-Void ProcessEffectEventsLoop() {
-    foreach(EffectOnPlayer in EffectsOnPlayerList) {
-        if(Now < EffectOnPlayer.EndAt) continue;
+Void CleanUp() {
+    G_PlayerEffect.clear();
+}
+
+Void SyncPlayerAvilEffectWithUI(CSmPlayer _player) {
+    declare netwrite Text Net_PlayerAvilEffectMarker for _player;
+    declare K_BoxEffect PlayerAvilEffect = G_PlayerEffect[_player.User.Login];
+    Net_PlayerAvilEffectMarker = PlayerAvilEffect.Name;
+}
+
+Void SetPlayerAvilEffect(CSmPlayer _player, Integer _effectIndex) {
+    declare K_BoxEffect Effect = GetEffectByIndex(_effectIndex);
+    G_PlayerEffect[_player.User.Login] = Effect;
+    SyncPlayerAvilEffectWithUI(_player);
+}
+
+Void GivePlayerRandomAvilEffect(CSmPlayer _player) {
+    G_PlayerEffect[_player.User.Login] = GetRandomEffect();
+    SyncPlayerAvilEffectWithUI(_player);
+}
+
+CSmPlayer GetNearestPlayer(CSmPlayer _player) {
+    declare CSmPlayer NearestPlayer = _player;
+    declare Real NearestDistance = 100000.00;
+    foreach (Player in Players) {
+        if (Player.User.Login != _player.User.Login) {
+            declare Real CurrentDistance = MathLib::Abs(MathLib::Distance(Player.Position, _player.Position));
+            if (CurrentDistance < NearestDistance) {
+                NearestDistance = CurrentDistance;
+                NearestPlayer = Player;
+            }
+        }
+    }
+
+    return NearestPlayer;
+}
+
+Void OnPlayerActivedEffect(CSmPlayer CurrentPlayer) {
+    if (!G_PlayerEffect.existskey(CurrentPlayer.User.Login)) return;
+
+    declare K_BoxEffect AvilEffect = G_PlayerEffect[CurrentPlayer.User.Login];
+    log("trying to activate an effect");
+    if (AvilEffect.Name != "None") {
+        switch(AvilEffect.TargetMode) {
+            case "self": {
+                ActivateOnPlayer(CurrentPlayer, AvilEffect);
+                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Activated $<%1$> on you", AvilEffect.Name));
+                SetPlayerAvilEffect(CurrentPlayer, 0);
+            }
+
+            case "nearest": {
+                declare CSmPlayer NearestPlayer = GetNearestPlayer(CurrentPlayer);
+                ActivateOnPlayer(NearestPlayer, AvilEffect);
+                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Activated $<%1$> on $<%2$>", AvilEffect.Name, NearestPlayer.User.Name));
+                SetPlayerAvilEffect(CurrentPlayer, 0);
+            }
+
+            case "all": {
+                foreach(Player in Players) {
+                    if (Player.User.Login != CurrentPlayer.User.Login) {
+                        ActivateOnPlayer(Player, AvilEffect);
+                    }
+                }
+                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Activated $<%1$> on everyone", AvilEffect.Name));
+                SetPlayerAvilEffect(CurrentPlayer, 0);
+            }
+        }
+    }
+}
+
+/**
+* Processed on event loop
+*/
+Void Yield() {
+    foreach (Player in Players) {
+        if(!G_PlayerEffect.existskey(Player.User.Login)) {
+            G_PlayerEffect[Player.User.Login] = GetEffectByIndex(0);
+            SyncPlayerAvilEffectWithUI(Player);
+        }
+    }
+
+    foreach (Event in PendingEvents) {
+        if (Event.Type == CSmModeEvent::EType::OnPlayerTriggersWaypoint) {
+            GivePlayerRandomAvilEffect(Event.Player); // Try to assign a random effect to the player
+        }
+
+        if (Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn) {
+            SetPlayerAvilEffect(Event.Player, 0); // Remove the effect from the player
+            ClearEffectOnPlayer(Event.Player);
+        }
+
+        if (Event.Type == CSmModeEvent::EType::OnPlayerRemoved) { // Event.Player is Null; Only User available
+            G_PlayerEffect.removekey(Event.User.Login);
+        }
+
+    }
+
+    foreach (UIEvent in UIManager.PendingEvents) {
+        if(UIEvent.CustomEventType == "activate") {
+            log("got even from the player");
+            declare CSmPlayer Player = GetPlayer(UIEvent.UI);
+            if(Player == Null) continue;
+            OnPlayerActivedEffect(Player);
+        }
+    }
+
+    foreach(EffectOnPlayer in G_EffectOnPlayer) {
+        if (Now < EffectOnPlayer.EndAt) continue;
         UnActivateOnPlayer(EffectOnPlayer);
     }
 }

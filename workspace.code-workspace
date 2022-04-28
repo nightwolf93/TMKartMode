@@ -5,6 +5,15 @@
 		},
 		{
 			"path": "Dedicated\\Scripts"
+		},
+		{
+			"path": "..\\TrackmaniaFlagRush\\DedicatedServer\\Scripts"
+		},
+		{
+			"path": "C:\\Users\\php_r\\OpenplanetNext\\Extract\\GameData\\Scripts"
+		},
+		{
+			"path": "C:\\Users\\php_r\\OpenplanetNext\\Extract\\Titles\\Trackmania\\Scripts"
 		}
 	],
 	"settings": {}
