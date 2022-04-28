@@ -10,7 +10,6 @@
 
 #Setting S_TrustClientSimu True
 #Setting S_UseCrudeExtrapolation False
-#Setting S_AutoSpecTimeout 300 as _("Idle Time before player is AutoSpeced")
 
 /////////////
 // Structs //
@@ -30,14 +29,6 @@ Effects::InitEffects();
 
 ***Match_PlayLoop***
 ***
-
-foreach (Player in Players) {
-    if (Player.IdleDuration >= S_AutoSpecTimeout * 1000 && S_AutoSpecTimeout >= 9 && Player.RequestsSpectate == False) {
-        ServerAdmin.ForceSpectator(Player.User, CServerAdmin::ESpecMode::SpectatorSelectable);
-        UIManager.GetUI(Player).SendChat("$z$ee0$s[$fffServer$ee0] You have been automatically sent to spectator.$z");
-    }
-}
-
 Effects::Yield();
 ***
 
