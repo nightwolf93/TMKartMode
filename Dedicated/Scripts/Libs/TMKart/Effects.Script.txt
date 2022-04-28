@@ -12,6 +12,9 @@
 // Structs //
 /////////////
 
+/**
+* You must sync this structure with Libs/TMKart/UI/EffectBoxLayer.Script.txt equalent one
+*/
 #Struct K_BoxEffect {
     Text        Name;
     Text        Marker;

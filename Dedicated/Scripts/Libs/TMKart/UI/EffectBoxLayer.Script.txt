@@ -1,5 +1,8 @@
 // #RequireContext CSmMlScriptIngame
 
+/**
+* You must sync this structure with Libs/TMKart/Effects.Script.txt equalent one
+*/
 #Struct K_BoxEffect {
     Text        Name;
     Text        Marker;
@@ -8,6 +11,7 @@
     Text        Function;
     Text        ImageURL;
 }
+
 
 Text Private_GenEffects(K_BoxEffect[] EffectList) {
     declare OutXml = """<frame id="Effects">""";
