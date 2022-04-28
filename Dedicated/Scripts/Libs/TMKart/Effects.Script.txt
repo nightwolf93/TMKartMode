@@ -3,13 +3,12 @@
 #Include "MathLib" as MathLib
 #Include "TextLib" as TextLib
 
-#Include "Libs/Nadeo/ModeLibs/Legacy/Layers2.Script.txt" as Layers
-// #Include "Libs/Nadeo/TMxSM/Race/Race.Script.txt" as Race
+#Include "Libs/Nadeo/ModeLibs/Legacy/Layers2.Script.txt"    as Layers
 
-#Include "Libs/TMKart/UI/EffectInkSplats.Script.txt" as InkSplats
-#Include "Libs/TMKart/UI/EffectBoxLayer.Script.txt" as EffectBoxLayer
-#Include "Libs/TMKart/UI/GameUI.Script.txt" as GameUI
-
+#Include "Libs/TMKart/UI/GameUI.Script.txt"                 as GameUI
+#Include "Libs/TMKart/UI/EffectInkSplats.Script.txt"        as InkSplats
+#Include "Libs/TMKart/UI/PlayerEffects.Script.txt"          as PlayerEffects
+#Include "Libs/TMKart/UI/EffectBoxLayer.Script.txt"         as EffectBoxLayer
 
 /////////////
 // Structs //
@@ -94,7 +93,7 @@ Void InitEffects() {
     Thunder.Name       = "Thunder";
     Thunder.Marker     = "e_thunder";
     Thunder.Function   = "SetPlayer_Delayed_NoEngine";
-    Thunder.TargetMode = "nearest";
+    Thunder.TargetMode = "first";
     Thunder.Duration   = 5000;
     Thunder.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968907448045948938/thunder.png";
     G_EffectsList.add(Thunder);
@@ -175,7 +174,7 @@ Void InitEffects() {
     declare K_BoxEffect InkSplats;
     InkSplats.Name           = "Ink Splats";
     InkSplats.Marker         = "e_ink_splats";
-    InkSplats.TargetMode     = "nearest";
+    InkSplats.TargetMode     = "first";
     InkSplats.ImageURL       = "https://cdn.discordapp.com/attachments/934577399033647104/968988325677522954/ink_icon.png";
     InkSplats.Duration       = 5000;
     G_EffectsList.add(InkSplats);
@@ -187,6 +186,10 @@ Void InitEffects() {
     Layers::Create("EffectBox", EffectBoxLayer::GetManialink(G_EffectsList));
     Layers::SetType("EffectBox", CUILayer::EUILayerType::Normal);
     Layers::Attach("EffectBox");
+
+    Layers::Create("PlayerEffects", PlayerEffects::GetManialink());
+    Layers::SetType("PlayerEffects", CUILayer::EUILayerType::Normal);
+    Layers::Attach("PlayerEffects");
 
     Layers::Create("GameUI", GameUI::GetManialink());
     Layers::SetType("GameUI", CUILayer::EUILayerType::Normal);
@@ -379,8 +382,8 @@ Void Yield() {
 
     foreach (Event in PendingEvents) {
         if (Event.Type == CSmModeEvent::EType::OnPlayerTriggersWaypoint) {
-            if (Event.IsFinish) continue; // Don't assign finished player an effect
-            GivePlayerRandomAvilEffect(Event.Player); // Try to assign a random effect to the player
+            if (Event.IsFinish) continue;               // Don't assign finished player an effect
+            GivePlayerRandomAvilEffect(Event.Player);   // Try to assign a random effect to the player
         }
 
         if (Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn) {
@@ -402,8 +405,21 @@ Void Yield() {
         }
     }
 
+    declare Text[][Text] Effects;
     foreach(EffectOnPlayer in G_EffectOnPlayer) {
-        if (Now < EffectOnPlayer.EndAt) continue;
-        UnActivateOnPlayer(EffectOnPlayer);
+        if (!Effects.existskey(EffectOnPlayer.Login)) {
+            Effects[EffectOnPlayer.Login] = [];
+        }
+        if (Now < EffectOnPlayer.EndAt) {
+            Effects[EffectOnPlayer.Login].add(EffectOnPlayer.Effect.ImageURL);
+            continue;
+        } else {
+            UnActivateOnPlayer(EffectOnPlayer);
+        }
     }
+
+    foreach(Login => EffectURLs in Effects) {
+        PlayerEffects::SendEffectsUrls(Login, EffectURLs);
+    }
+
 }
