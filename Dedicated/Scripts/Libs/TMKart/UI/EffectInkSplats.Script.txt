@@ -2,9 +2,8 @@
 
 
 Void SetStatus(CSmPlayer Player, Boolean Status) {
-    declare CUIConfig UI = UIManager.GetUI(Player);
-    declare netwrite Boolean Net_TMKart_InksplatStatus for UI;
-    declare netwrite Integer Net_TMKart_InksplatUpdate for UI = -1;
+    declare netwrite Boolean Net_TMKart_InksplatStatus for Player;
+    declare netwrite Integer Net_TMKart_InksplatUpdate for Player = -1;
     Net_TMKart_InksplatStatus = Status;
     Net_TMKart_InksplatUpdate = Now;
 }
@@ -63,9 +62,9 @@ Text GetManialink() {
 
 
     main() {
-        wait(UI != Null);
-        declare netread Boolean Net_TMKart_InksplatStatus for UI;
-        declare netread Integer Net_TMKart_InksplatUpdate for UI = -1;
+        wait(GUIPlayer != Null);
+        declare netread Boolean Net_TMKart_InksplatStatus for GUIPlayer;
+        declare netread Integer Net_TMKart_InksplatUpdate for GUIPlayer = -1;
         declare Integer LastUpdate;
         SplatSfx = Audio.CreateSound("https://cdn.discordapp.com/attachments/934577399033647104/968984484735221780/ink_splash_sfx.ogg", 0., False, False, False);
         while(True) {

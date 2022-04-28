@@ -388,6 +388,7 @@ Void Yield() {
 
         if (Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn) {
             SetPlayerAvilEffect(Event.Player, 0); // Remove the effect from the player
+            PlayerEffects::SendEffectsUrls(Event.Player.User.Login, []);
             ClearEffectOnPlayer(Event.Player);
         }
 
