@@ -1,0 +1,54 @@
+// #RequireContext CSmMode
+
+
+Void SendEffectsUrls(Text Login, Text[] EffectUrls) {
+    declare CSmPlayer Player = GetPlayer(Login);
+    if (Player == Null) return;
+    declare netwrite Text[] Net_TMKart_PlayerEffects for Player;
+    Net_TMKart_PlayerEffects = EffectUrls;
+}
+
+
+Text GetManialink() {
+    return """
+    <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+    <manialink version="3">
+    <frame pos="-40 85">
+        <quad pos="0 0"    size="12 12" style="Bgs1InRace" substyle="BgColorContour" opacity="1"/>
+        <quad pos="13 0"   size="12 12" style="Bgs1InRace" substyle="BgColorContour" opacity="1"/>
+        <quad pos="0 -13"  size="12 12" style="Bgs1InRace" substyle="BgColorContour" opacity="1"/>
+        <quad pos="13 -13" size="12 12" style="Bgs1InRace" substyle="BgColorContour" opacity="1"/>
+        <frame id="Effects" z-index="-1">
+            <quad pos="0.5 -0.5"   size="11 11" hidden="1" />
+            <quad pos="13.5 -0.5"  size="11 11" hidden="1" />
+            <quad pos="0.5 -13.5"  size="11 11" hidden="1" />
+            <quad pos="13.5 -13.5" size="11 11" hidden="1" />
+        </frame>
+    </frame>
+    <script><!--
+
+    main() {
+        wait(GUIPlayer != Null);
+        declare CMlFrame Frame = Page.GetFirstChild("Effects") as CMlFrame;
+        declare Integer PreviousEffects = -1;
+        declare netread Text[] Net_TMKart_PlayerEffects for GUIPlayer;
+        while(True) {
+            yield;
+            if (Net_TMKart_PlayerEffects.count != PreviousEffects) {
+                PreviousEffects = Net_TMKart_PlayerEffects.count;
+                foreach (i => Elem in Frame.Controls) {
+                    Elem.Hide();
+                    if (Net_TMKart_PlayerEffects.existskey(i)) {
+                        Elem.Show();
+                        (Elem as CMlQuad).ImageUrl = Net_TMKart_PlayerEffects[i];
+                    }
+                }
+            }
+        }
+    }
+
+    --></script>
+    </manialink>
+    """;
+}
+

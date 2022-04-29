@@ -3,13 +3,14 @@
 #Include "MathLib" as MathLib
 #Include "TextLib" as TextLib
 
-#Include "Libs/Nadeo/ModeLibs/Legacy/Layers2.Script.txt" as Layers
-// #Include "Libs/Nadeo/TMxSM/Race/Race.Script.txt" as Race
+#Include "Libs/Nadeo/ModeLibs/Legacy/Layers2.Script.txt"    as Layers
 
-#Include "Libs/TMKart/UI/EffectInkSplats.Script.txt" as InkSplats
-#Include "Libs/TMKart/UI/EffectBoxLayer.Script.txt" as EffectBoxLayer
-#Include "Libs/TMKart/UI/GameUI.Script.txt" as GameUI
-
+#Include "Libs/TMKart/UI/GameUI.Script.txt"                 as GameUI
+#Include "Libs/TMKart/UI/EffectInkSplats.Script.txt"        as InkSplats
+#Include "Libs/TMKart/UI/PlayerEffects.Script.txt"          as PlayerEffects
+#Include "Libs/TMKart/UI/EffectBoxLayer.Script.txt"         as EffectBoxLayer
+#Include "Libs/TMKart/UI/EventFeed.Script.txt"              as EventFeed
+#Include "Libs/TMKart/UI/MapName.Script.txt"                as MapNameLayer
 
 /////////////
 // Structs //
@@ -25,6 +26,7 @@
     Integer     Duration;
     Text        Function;
     Text        ImageURL;
+    Text        Color;
 }
 
 #Struct K_BoxEffectOnPlayer {
@@ -87,16 +89,18 @@ Void InitEffects() {
     NoneEffect.TargetMode = "none";
     NoneEffect.Duration   = 0;
     NoneEffect.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911908595961876/nothing.png";
+    NoneEffect.Color      = "fff";
     G_EffectsList.add(NoneEffect);
 
     // Thunder // NoEngine
     declare K_BoxEffect Thunder;
-    Thunder.Name       = "Thunder";
+    Thunder.Name       = "No Engine";
     Thunder.Marker     = "e_thunder";
     Thunder.Function   = "SetPlayer_Delayed_NoEngine";
     Thunder.TargetMode = "nearest";
     Thunder.Duration   = 5000;
     Thunder.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968907448045948938/thunder.png";
+    Thunder.Color      = "ff0";
     G_EffectsList.add(Thunder);
 
     // CruiseControlAll
@@ -105,25 +109,28 @@ Void InitEffects() {
     ForceCruiseControlAll.Marker     = "e_cruise_all";
     ForceCruiseControlAll.TargetMode = "nearest";
     ForceCruiseControlAll.Duration   = 3500;
-    ForceCruiseControlAll.ImageURL = "https://cdn.discordapp.com/attachments/934577399033647104/968908512602255370/cruisecontrol.png";
+    ForceCruiseControlAll.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968908512602255370/cruisecontrol.png";
+    ForceCruiseControlAll.Color      = "0d0";
     G_EffectsList.add(ForceCruiseControlAll);
 
     // Turbo
     declare K_BoxEffect Turbo;
-    Turbo.Name       = "Turbo";
+    Turbo.Name       = "Reactor Boost";
     Turbo.Marker     = "e_turbo_self";
     Turbo.TargetMode = "self";
     Turbo.Duration   = 2500;
     Turbo.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968909707366506496/boost1.png";
+    Turbo.Color      = "f90";
     G_EffectsList.add(Turbo);
 
     // Turbo2
     declare K_BoxEffect SuperTurbo;
-    SuperTurbo.Name       = "Super Turbo";
+    SuperTurbo.Name       = "Super Reactor Boost";
     SuperTurbo.Marker     = "e_turbo2_self";
     SuperTurbo.TargetMode = "self";
     SuperTurbo.Duration   = 2500;
     SuperTurbo.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968909881287516210/boost2.png";
+    SuperTurbo.Color      = "e22";
     G_EffectsList.add(SuperTurbo);
 
     // Fragile
@@ -133,15 +140,17 @@ Void InitEffects() {
     Fragile.TargetMode = "nearest";
     Fragile.Duration   = 10000;
     Fragile.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968910304090148905/fragile.png";
+    Fragile.Color      = "d70";
     G_EffectsList.add(Fragile);
 
     // NoBrake
     declare K_BoxEffect NoBrake;
-    NoBrake.Name       = "No Brake";
+    NoBrake.Name       = "No Brakes";
     NoBrake.Marker     = "e_nobrake";
     NoBrake.TargetMode = "nearest";
     NoBrake.Duration   = 5000;
     NoBrake.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968910570763984947/nobrake.png";
+    NoBrake.Color      = "ef0";
     G_EffectsList.add(NoBrake);
 
     // LowGravity
@@ -149,8 +158,9 @@ Void InitEffects() {
     LowGravity.Name         = "Low Gravity";
     LowGravity.Marker       = "e_low_gravity";
     LowGravity.TargetMode   = "nearest";
-    LowGravity.Duration   = 5000;
-    LowGravity.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911201918668810/lowgravity.png";
+    LowGravity.Duration     = 5000;
+    LowGravity.ImageURL     = "https://cdn.discordapp.com/attachments/934577399033647104/968911201918668810/lowgravity.png";
+    LowGravity.Color        = "0af";
     G_EffectsList.add(LowGravity);
 
     // SlowMo
@@ -158,17 +168,19 @@ Void InitEffects() {
     SlowMo.Name         = "Slow Motion";
     SlowMo.Marker       = "e_slowmo";
     SlowMo.TargetMode   = "nearest";
-    SlowMo.Duration   = 2500;
-    SlowMo.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911442105479228/slowmo.png";
+    SlowMo.Duration     = 2500;
+    SlowMo.ImageURL     = "https://cdn.discordapp.com/attachments/934577399033647104/968911442105479228/slowmo.png";
+    SlowMo.Color        = "aaa";
     G_EffectsList.add(SlowMo);
 
     // Yeet
     declare K_BoxEffect Yeet;
-    Yeet.Name     = "YEEET";
-    Yeet.Marker   = "e_turbo2_self";
-    Yeet.TargetMode   = "nearest";
-    Yeet.Duration   = 3000;
-    Yeet.ImageURL   = "https://cdn.discordapp.com/attachments/934577399033647104/968911657126473728/yeet.png";
+    Yeet.Name           = "YEEET";
+    Yeet.Marker         = "e_turbo2_self";
+    Yeet.TargetMode     = "nearest";
+    Yeet.Duration       = 3000;
+    Yeet.ImageURL       = "https://cdn.discordapp.com/attachments/934577399033647104/968911657126473728/yeet.png";
+    Yeet.Color          = "900";
     G_EffectsList.add(Yeet);
 
     // Ink Splats
@@ -177,8 +189,33 @@ Void InitEffects() {
     InkSplats.Marker         = "e_ink_splats";
     InkSplats.TargetMode     = "nearest";
     InkSplats.ImageURL       = "https://cdn.discordapp.com/attachments/934577399033647104/968988325677522954/ink_icon.png";
+    InkSplats.Color          = "000";
     InkSplats.Duration       = 5000;
     G_EffectsList.add(InkSplats);
+
+    // NoGrip
+    declare K_BoxEffect NoGrip;
+    NoGrip.Name           = "No Grip";
+    NoGrip.Marker         = "e_no_grip";
+    NoGrip.TargetMode     = "nearest";
+    NoGrip.ImageURL       = "https://cdn.discordapp.com/attachments/934577399033647104/969386365156479006/nogrip.png";
+    NoGrip.Color          = "0dd";
+    NoGrip.Duration       = 5000;
+    G_EffectsList.add(NoGrip);
+
+    // Ink Splats
+    declare K_BoxEffect NoSteer;
+    NoSteer.Name           = "No Steer";
+    NoSteer.Marker         = "e_no_steer";
+    NoSteer.TargetMode     = "nearest";
+    NoSteer.ImageURL       = "https://cdn.discordapp.com/attachments/934577399033647104/969386365466837033/nosteer.png";
+    NoSteer.Color          = "d0d";
+    NoSteer.Duration       = 1000;
+    G_EffectsList.add(NoSteer);
+
+    Layers::Create("MapName", MapNameLayer::GetManialink());
+    Layers::SetType("MapName", CUILayer::EUILayerType::Normal);
+    Layers::Attach("MapName");
 
     Layers::Create("InkSplats", InkSplats::GetManialink());
     Layers::SetType("InkSplats", CUILayer::EUILayerType::Normal);
@@ -188,11 +225,19 @@ Void InitEffects() {
     Layers::SetType("EffectBox", CUILayer::EUILayerType::Normal);
     Layers::Attach("EffectBox");
 
+    Layers::Create("PlayerEffects", PlayerEffects::GetManialink());
+    Layers::SetType("PlayerEffects", CUILayer::EUILayerType::Normal);
+    Layers::Attach("PlayerEffects");
+
     Layers::Create("GameUI", GameUI::GetManialink());
     Layers::SetType("GameUI", CUILayer::EUILayerType::Normal);
     Layers::Attach("GameUI");
 
+    Layers::Create("EventFeed", EventFeed::GetManialink(8));
+    Layers::SetType("EventFeed", CUILayer::EUILayerType::Normal);
+    Layers::Attach("EventFeed");
 
+    EventFeed::ClearMessages();
 }
 
 Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
@@ -204,7 +249,7 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
             SetPlayer_Delayed_NoEngine(Player, True);
         }
         case "e_cruise_all": {
-            SetPlayer_Delayed_Cruise(Player, True, Player.Speed);
+            SetPlayer_Delayed_Cruise(Player, True, MathLib::Rand(20., 40.)*10.);
         }
         case "e_turbo_self": {
             SetPlayer_Delayed_BoostUp(Player, True);
@@ -224,8 +269,13 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
         case "e_slowmo": {
             SetPlayer_Delayed_SlowMotion(Player, True);
         }
-        case "e_ink_splats":
-        {
+        case "e_no_grip": {
+            SetPlayer_Delayed_AdherenceCoef(Player, 0.2);
+        }
+        case "e_no_steer": {
+            SetPlayer_Delayed_NoSteer(Player, True);
+        }
+        case "e_ink_splats": {
             InkSplats::SetStatus(Player, True);
         }
     }
@@ -268,12 +318,20 @@ Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
                 case "e_slowmo": {
                     SetPlayer_Delayed_SlowMotion(Player, False);
                 }
+                case "e_no_grip":
+                {
+                    SetPlayer_Delayed_AdherenceCoef(Player, 1.);
+                }
+                case "e_no_steer":
+                {
+                    SetPlayer_Delayed_NoSteer(Player, False);
+                }
             }
         }
         if (_effectOnPlayer.Effect.Marker == "e_ink_splats") {
             InkSplats::SetStatus(Player, False);
         }
-        // UIManager.GetUI(Player).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, TextLib::Compose("Effect $<%1$> cleared", _effectOnPlayer.Effect.Name));
+        // EventFeed::SendMessage("""$f00 ${{{ _effectOnPlayer.Effect.Color }}}{{{ _effectOnPlayer.Effect.Name }}}$fff ➔ {{{Player.User.Name}}}""", _effectOnPlayer.Effect.ImageURL);
     }
     G_EffectOnPlayer.removekey(TextLib::ToText(_effectOnPlayer.StartAt));
 }
@@ -342,14 +400,14 @@ Void OnPlayerActivedEffect(CSmPlayer CurrentPlayer) {
 
             case "self": {
                 ActivateOnPlayer(CurrentPlayer, AvilEffect);
-                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, """Activated {{{ AvilEffect.Name }}} on you""");
+                EventFeed::SendMessage("""$fff ${{{ AvilEffect.Color }}}{{{ AvilEffect.Name }}}$fff ➔ {{{CurrentPlayer.User.Name}}}""", AvilEffect.ImageURL);
                 SetPlayerAvilEffect(CurrentPlayer, 0);
             }
 
             case "nearest": {
                 declare CSmPlayer NearestPlayer = GetNearestPlayer(CurrentPlayer);
                 ActivateOnPlayer(NearestPlayer, AvilEffect);
-                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, """Activated {{{ AvilEffect.Name }}} on {{{ NearestPlayer.User.Name }}}""");
+                EventFeed::SendMessage("""$fff ${{{ AvilEffect.Color }}}{{{ AvilEffect.Name }}}$fff {{{CurrentPlayer.User.Name}}} ➔ {{{NearestPlayer.User.Name}}}""", AvilEffect.ImageURL);
                 SetPlayerAvilEffect(CurrentPlayer, 0);
             }
 
@@ -359,7 +417,7 @@ Void OnPlayerActivedEffect(CSmPlayer CurrentPlayer) {
                         ActivateOnPlayer(Player, AvilEffect);
                     }
                 }
-                UIManager.GetUI(CurrentPlayer).QueueMessage(2000, 2, CUIConfig::EMessageDisplay::Big, """Activated {{{ AvilEffect.Name }}} on everyone""");
+                EventFeed::SendMessage("""$fff ${{{ AvilEffect.Color }}}{{{ AvilEffect.Name }}}$fff {{{CurrentPlayer.User.Name}}} ➔ Everyone""", AvilEffect.ImageURL);
                 SetPlayerAvilEffect(CurrentPlayer, 0);
             }
         }
@@ -379,12 +437,17 @@ Void Yield() {
 
     foreach (Event in PendingEvents) {
         if (Event.Type == CSmModeEvent::EType::OnPlayerTriggersWaypoint) {
-            if (Event.IsFinish) continue; // Don't assign finished player an effect
-            GivePlayerRandomAvilEffect(Event.Player); // Try to assign a random effect to the player
+            if (Event.Player != Null) {
+                declare K_BoxEffect effect = G_PlayerEffect[Event.Player.User.Login];
+                if (effect.Name != "None") continue;
+                if (Event.IsNewLap || Event.IsFinish) continue; // Don't assign finished player an effect
+                GivePlayerRandomAvilEffect(Event.Player);   // Try to assign a random effect to the player
+            }
         }
 
         if (Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn) {
             SetPlayerAvilEffect(Event.Player, 0); // Remove the effect from the player
+            PlayerEffects::SendEffectsUrls(Event.Player.User.Login, []);
             ClearEffectOnPlayer(Event.Player);
         }
 
@@ -402,8 +465,21 @@ Void Yield() {
         }
     }
 
+    declare Text[][Text] Effects;
     foreach(EffectOnPlayer in G_EffectOnPlayer) {
-        if (Now < EffectOnPlayer.EndAt) continue;
-        UnActivateOnPlayer(EffectOnPlayer);
+        if (!Effects.existskey(EffectOnPlayer.Login)) {
+            Effects[EffectOnPlayer.Login] = [];
+        }
+        if (Now < EffectOnPlayer.EndAt) {
+            Effects[EffectOnPlayer.Login].add(EffectOnPlayer.Effect.ImageURL);
+            continue;
+        } else {
+            UnActivateOnPlayer(EffectOnPlayer);
+        }
     }
+
+    foreach(Login => EffectURLs in Effects) {
+        PlayerEffects::SendEffectsUrls(Login, EffectURLs);
+    }
+
 }

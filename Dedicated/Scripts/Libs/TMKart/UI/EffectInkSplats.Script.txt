@@ -2,9 +2,8 @@
 
 
 Void SetStatus(CSmPlayer Player, Boolean Status) {
-    declare CUIConfig UI = UIManager.GetUI(Player);
-    declare netwrite Boolean Net_TMKart_InksplatStatus for UI;
-    declare netwrite Integer Net_TMKart_InksplatUpdate for UI = -1;
+    declare netwrite Boolean Net_TMKart_InksplatStatus for Player;
+    declare netwrite Integer Net_TMKart_InksplatUpdate for Player = -1;
     Net_TMKart_InksplatStatus = Status;
     Net_TMKart_InksplatUpdate = Now;
 }
@@ -17,12 +16,12 @@ Text GetManialink() {
     <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
     <manialink version="3">
     <frame id="Splatter">
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
     </frame>
 
     <script><!--
@@ -46,6 +45,7 @@ Text GetManialink() {
             Quad.RelativePosition_V3 = newPos;
             Quad.RelativeRotation = Math::Rand(0., 5.)*15;
             Quad.Scale = 2.5;
+            AnimMgr.Flush(Quad);
             AnimMgr.Add(Quad, "<elem opacity=\"1\" />", Now + i*250, 1000, CAnimManager::EAnimManagerEasing::CircIn);
         }
         SplatSfx.Play();
@@ -57,21 +57,24 @@ Text GetManialink() {
     Void DisableSplat() {
         declare CMlFrame Frame = Page.GetFirstChild("Splatter") as CMlFrame;
         foreach (i => Elem in Frame.Controls) {
+            AnimMgr.Flush(Elem);
             AnimMgr.Add(Elem, "<elem opacity=\"0\" />", Now + (Frame.Controls.count - i)*250, 1000, CAnimManager::EAnimManagerEasing::CircOut);
         }
     }
 
-
     main() {
-        wait(UI != Null);
-        declare netread Boolean Net_TMKart_InksplatStatus for UI;
-        declare netread Integer Net_TMKart_InksplatUpdate for UI = -1;
+        wait(GUIPlayer != Null);
+        declare netread Boolean Net_TMKart_InksplatStatus for GUIPlayer;
+        declare netread Integer Net_TMKart_InksplatUpdate for GUIPlayer = -1;
         declare Integer LastUpdate;
+        declare Boolean TestValue;
         SplatSfx = Audio.CreateSound("https://cdn.discordapp.com/attachments/934577399033647104/968984484735221780/ink_splash_sfx.ogg", 0., False, False, False);
         while(True) {
             yield;
+
             if (Net_TMKart_InksplatUpdate > LastUpdate) {
                 LastUpdate = Net_TMKart_InksplatUpdate;
+                TestValue = Net_TMKart_InksplatStatus;
                 if (Net_TMKart_InksplatStatus) {
                     EnableSplat();
                 }
@@ -79,6 +82,10 @@ Text GetManialink() {
                     DisableSplat();
                 }
             }
+            /*if (TestValue && Now > (LastUpdate + 20000)) {
+                TestValue = False;
+                DisableSplat();
+            }*/
         }
     }
 

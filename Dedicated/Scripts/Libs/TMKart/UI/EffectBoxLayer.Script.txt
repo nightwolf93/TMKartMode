@@ -10,6 +10,7 @@
     Integer     Duration;
     Text        Function;
     Text        ImageURL;
+    Text        Color;
 }
 
 Text Private_GenEffects(K_BoxEffect[] EffectList) {
@@ -19,8 +20,8 @@ Text Private_GenEffects(K_BoxEffect[] EffectList) {
         if (i == 0) Hid = "hidden=\"0\"";
         OutXml ^= """
         <frame id="{{{ Effect.Name }}}" {{{ Hid }}}>
-        <quad pos="0 1" size="19 19" opacity="1" image="{{{ Effect.ImageURL }}}" halign="center" valign="center"/>
-        <label pos="0 -9.5" size="20 4" text="{{{ Effect.Name }}}" textfont="GameFontRegular" textsize="2" halign="center" valign="center" />
+        <quad pos="12.5 -10" size="19 19" opacity="1" image="{{{ Effect.ImageURL }}}" halign="center" valign="center"/>
+        <label pos="12.5 -21.5" size="20 4" text="{{{ Effect.Name }}}" textfont="GameFontRegular" textsize="2" halign="center" valign="center" />
         </frame>
         """;
     }
@@ -33,9 +34,9 @@ Text GetManialink(K_BoxEffect[] EffectList) {
 
     return """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
     <manialink version="3">
-    <frame pos="0 75">
+    <frame pos="-12.5 85">
     {{{ EffectsXml }}}
-    <quad pos="0 0" z-index="0" size="25 25" style="Bgs1InRace" substyle="BgColorContour" opacity="0.7" halign="center" valign="center"/>
+    <quad pos="0 0" z-index="0" size="25 25" style="Bgs1InRace" substyle="BgColorContour" opacity="0.7" />
     </frame>
     <script><!--
     #Include "TextLib" as TextLib
@@ -97,7 +98,7 @@ Text GetManialink(K_BoxEffect[] EffectList) {
     {
         wait(GUIPlayer != Null);
         declare LastEffectName = "";
-        declare netread Text Net_PlayerAvilEffectMarker for GUIPlayer;
+        declare netread Text Net_PlayerAvilEffectMarker for GUIPlayer = "None";
         declare Integer Key = 33;
         G_Sfx = Audio.CreateSound("https://cdn.discordapp.com/attachments/934577399033647104/969235965719760936/roulette_sfx2.ogg");
         while(True)
@@ -106,12 +107,14 @@ Text GetManialink(K_BoxEffect[] EffectList) {
 
             if (LastEffectName != Net_PlayerAvilEffectMarker) {
                 LastEffectName = Net_PlayerAvilEffectMarker;
-                if (Net_PlayerAvilEffectMarker == "None") {
+                if (Net_PlayerAvilEffectMarker == "" || Net_PlayerAvilEffectMarker == "None") {
                     SetActiveEffect("None");
                 } else {
                     CarouselActiveEffect(Net_PlayerAvilEffectMarker);
                 }
             }
+
+            if (Net_PlayerAvilEffectMarker == "None") continue;
 
             foreach (Event in PendingEvents) {
                 if (Event.Type == CMlScriptEvent::Type::KeyPress &&Event.KeyCode == Key) {

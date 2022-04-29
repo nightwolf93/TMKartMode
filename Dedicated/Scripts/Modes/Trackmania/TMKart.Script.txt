@@ -7,6 +7,7 @@
 
 #Include "Libs/TMKart/Effects.Script.txt" as Effects
 #Include "Libs/TMKart/UI/GameUI.Script.txt" as GameUI
+#Include "Libs/TMKart/UI/EventFeed.Script.txt" as EventFeed
 
 #Setting S_TrustClientSimu True
 #Setting S_UseCrudeExtrapolation False
@@ -41,6 +42,12 @@ GameUI::SyncLaps();
 ***Match_InitMatch***
 ***
 Effects::CleanUp();
+EventFeed::ClearMessages();
+***
+
+***Match_EndMatch***
+***
+EventFeed::ClearMessages();
 ***
 
 ***Match_InitRound***

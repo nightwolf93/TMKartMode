@@ -1,0 +1,168 @@
+// #RequireContext CSmMode
+
+// this must be exact same as in manialink, remember to change it if you edit here.
+#Struct K_FeedMessage {
+	Text Message;
+	Text IconURL;
+	Integer Stamp;
+}
+
+#Const C_FeedMessageAmount 8
+
+declare K_FeedMessage[][Text] G_FeedMessages;
+
+K_FeedMessage[] GetPlayerMessage(CSmPlayer Player) {
+	if (!G_FeedMessages.existskey(Player.User.Login)) {
+		G_FeedMessages[Player.User.Login] = [];
+	}
+	return G_FeedMessages[Player.User.Login];
+}
+
+Void SetPlayerMessage(CSmPlayer Player, K_FeedMessage Message) {
+	if (Player == Null) return;
+
+	if (!G_FeedMessages.existskey(Player.User.Login)) {
+		G_FeedMessages[Player.User.Login] = [];
+	}
+	G_FeedMessages[Player.User.Login].addfirst(Message);
+	G_FeedMessages[Player.User.Login] = G_FeedMessages[Player.User.Login].slice(0, C_FeedMessageAmount);
+}
+
+Void ClearMessages() {
+	G_FeedMessages.clear();
+	foreach(Player in AllPlayers) {
+		if (Player != Null) {
+			declare netwrite K_FeedMessage[] Net_EventFeed_Messages for Player;
+			declare netwrite Integer Net_EventFeed_Update for Player;
+			Net_EventFeed_Messages = GetPlayerMessage(Player);
+			Net_EventFeed_Update = Now;
+		}
+	}
+}
+
+/**
+* Adds Message to event Feed
+* @param string:Text = main message, displayed in white without colorcodes, supports game colorcodes syntax
+*/
+Void SendMessage(Text string, Text IconUrl, CSmPlayer CurrentPlayer) {
+	if (CurrentPlayer != Null) {
+		declare Integer LikeNow = Now;
+		SetPlayerMessage(CurrentPlayer, K_FeedMessage{Message=string, IconURL=IconUrl, Stamp=LikeNow});
+
+		declare netwrite K_FeedMessage[] Net_EventFeed_Messages for CurrentPlayer;
+		declare netwrite Integer Net_EventFeed_Update for CurrentPlayer;
+		Net_EventFeed_Update = LikeNow;
+		Net_EventFeed_Messages = GetPlayerMessage(CurrentPlayer);
+	}
+}
+
+Void SendMessageToAll(Text string, Text IconUrl) {
+	foreach(Player in AllPlayers) {
+		if (Player != Null) {
+			SendMessage(string, IconUrl, Player);
+		}
+	}
+}
+
+Void SendMessage(Text string, Text IconUrl) {
+	SendMessageToAll(string, IconUrl);
+}
+
+Void SendMessage(Text string) {
+	SendMessageToAll(string, "");
+}
+
+Text GetManialink(Integer feedSize) {
+	declare Text entries = "";
+	for (i, 0, feedSize) {
+		entries ^= """<frameinstance modelid="message"/> """ ^ "\n";
+	}
+
+	return """<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+	<manialink version="3" name="EventFeed">
+	<framemodel id="message">
+	<quad size="4 4" pos="0 -1.5" halign="center" valign="center"/>
+	<label size="60 4" pos="5 -1.5" text="" textsize="2" textfont="GameFontSemiBold" halign="left" valign="center2" opacity="0" textemboss="1" />
+	</framemodel>
+	<frame id="Events" pos="-158 10" >
+	{{{ entries }}}
+	</frame>
+	<script><!--
+	#Include "MathLib" as ML
+
+	#Const size {{{ feedSize-1 }}}
+
+	#Struct K_FeedMessage {
+		Text Message;
+		Text IconURL;
+		Integer Stamp;
+	}
+
+	declare Integer counter;
+	declare Integer LastUpdate;
+
+	Void addMessage(K_FeedMessage Message) {
+		declare CMlFrame frame = (Page.GetFirstChild("Events") as CMlFrame);
+		declare idx = counter%size;
+
+		for (i,0,size) {
+			declare key = (idx + i) % size;
+			frame.Controls[key].RelativePosition_V3.Y = -i * 4.5;
+		}
+
+		if (frame.Controls.existskey(idx)) {
+			declare CMlFrame elem = frame.Controls[idx] as CMlFrame;
+			declare CMlLabel label = elem.Controls[1] as CMlLabel;
+
+			label.Value = Message.Message;
+			label.RelativeScale= 1.2;
+			label.Opacity = 0.;
+
+			AnimMgr.Flush(label);
+			AnimMgr.Add(label, "<label scale=\"1\" opacity=\"1\" pos=\"3 "^label.RelativePosition_V3.Y ^"\" />", 750, CAnimManager::EAnimManagerEasing::CircOut);
+			AnimMgr.Add(label, "<label opacity=\"0\" scale=\"1.1\"/>", Now+7500, 1000, CAnimManager::EAnimManagerEasing::CircOut);
+			declare CMlQuad quad = elem.Controls[0] as CMlQuad;
+			quad.Opacity = 0.;
+			if (Message.IconURL != "") {
+				quad.RelativeScale= 1.2;
+				quad.ImageUrl = Message.IconURL;
+				AnimMgr.Flush(quad);
+				AnimMgr.Add(quad, "<quad scale=\"1\" opacity=\"1\" pos=\"0 "^label.RelativePosition_V3.Y ^"\" />", 750, CAnimManager::EAnimManagerEasing::CircOut);
+				AnimMgr.Add(quad, "<quad opacity=\"0\" scale=\"1.1\"/>", Now+7500, 1000, CAnimManager::EAnimManagerEasing::CircOut);
+			}
+
+		}
+		counter+=1;
+	}
+
+	Void processMessage(Integer stamp) {
+		declare netread K_FeedMessage[] Net_EventFeed_Messages for InputPlayer;
+
+		foreach (Message in Net_EventFeed_Messages) {
+			if (Message.Stamp == stamp) {
+				addMessage(Message);
+			}
+		}
+	}
+
+
+	main() {
+		wait(InputPlayer != Null);
+		declare netread Integer Net_EventFeed_Update for InputPlayer;
+		declare CMlFrame frame = (Page.GetFirstChild("Events") as CMlFrame);
+		LastUpdate = 0;
+
+		while(True) {
+			yield;
+
+			if (Net_EventFeed_Update > LastUpdate) {
+				LastUpdate = Net_EventFeed_Update;
+				processMessage(Net_EventFeed_Update);
+			}
+
+		}
+	}
+	--></script>
+	</manialink>
+	""";
+}
