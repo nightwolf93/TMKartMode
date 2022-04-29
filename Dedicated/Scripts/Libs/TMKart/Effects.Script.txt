@@ -210,7 +210,7 @@ Void InitEffects() {
     NoSteer.TargetMode     = "nearest";
     NoSteer.ImageURL       = "https://cdn.discordapp.com/attachments/934577399033647104/969386365466837033/nosteer.png";
     NoSteer.Color          = "d0d";
-    NoSteer.Duration       = 5000;
+    NoSteer.Duration       = 1000;
     G_EffectsList.add(NoSteer);
 
     Layers::Create("MapName", MapNameLayer::GetManialink());
@@ -270,7 +270,7 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
             SetPlayer_Delayed_SlowMotion(Player, True);
         }
         case "e_no_grip": {
-            SetPlayer_Delayed_AdherenceCoef(Player, 0.3);
+            SetPlayer_Delayed_AdherenceCoef(Player, 0.2);
         }
         case "e_no_steer": {
             SetPlayer_Delayed_NoSteer(Player, True);
