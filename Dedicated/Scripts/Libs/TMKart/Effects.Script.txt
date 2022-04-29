@@ -10,6 +10,7 @@
 #Include "Libs/TMKart/UI/PlayerEffects.Script.txt"          as PlayerEffects
 #Include "Libs/TMKart/UI/EffectBoxLayer.Script.txt"         as EffectBoxLayer
 #Include "Libs/TMKart/UI/EventFeed.Script.txt"              as EventFeed
+#Include "Libs/TMKart/UI/MapName.Script.txt"                as MapNameLayer
 
 /////////////
 // Structs //
@@ -192,6 +193,30 @@ Void InitEffects() {
     InkSplats.Duration       = 5000;
     G_EffectsList.add(InkSplats);
 
+    // NoGrip
+    declare K_BoxEffect NoGrip;
+    NoGrip.Name           = "No Grip";
+    NoGrip.Marker         = "e_no_grip";
+    NoGrip.TargetMode     = "nearest";
+    NoGrip.ImageURL       = "https://cdn.discordapp.com/attachments/934577399033647104/969386365156479006/nogrip.png";
+    NoGrip.Color          = "0dd";
+    NoGrip.Duration       = 5000;
+    G_EffectsList.add(NoGrip);
+
+    // Ink Splats
+    declare K_BoxEffect NoSteer;
+    NoSteer.Name           = "No Steer";
+    NoSteer.Marker         = "e_no_steer";
+    NoSteer.TargetMode     = "nearest";
+    NoSteer.ImageURL       = "https://cdn.discordapp.com/attachments/934577399033647104/969386365466837033/nosteer.png";
+    NoSteer.Color          = "d0d";
+    NoSteer.Duration       = 5000;
+    G_EffectsList.add(NoSteer);
+
+    Layers::Create("MapName", MapNameLayer::GetManialink());
+    Layers::SetType("MapName", CUILayer::EUILayerType::Normal);
+    Layers::Attach("MapName");
+
     Layers::Create("InkSplats", InkSplats::GetManialink());
     Layers::SetType("InkSplats", CUILayer::EUILayerType::Normal);
     Layers::Attach("InkSplats");
@@ -224,7 +249,7 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
             SetPlayer_Delayed_NoEngine(Player, True);
         }
         case "e_cruise_all": {
-            SetPlayer_Delayed_Cruise(Player, True, Player.Speed);
+            SetPlayer_Delayed_Cruise(Player, True, MathLib::Rand(20., 40.)*10.);
         }
         case "e_turbo_self": {
             SetPlayer_Delayed_BoostUp(Player, True);
@@ -244,8 +269,13 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
         case "e_slowmo": {
             SetPlayer_Delayed_SlowMotion(Player, True);
         }
-        case "e_ink_splats":
-        {
+        case "e_no_grip": {
+            SetPlayer_Delayed_AdherenceCoef(Player, 0.3);
+        }
+        case "e_no_steer": {
+            SetPlayer_Delayed_NoSteer(Player, True);
+        }
+        case "e_ink_splats": {
             InkSplats::SetStatus(Player, True);
         }
     }
@@ -288,12 +318,20 @@ Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
                 case "e_slowmo": {
                     SetPlayer_Delayed_SlowMotion(Player, False);
                 }
+                case "e_no_grip":
+                {
+                    SetPlayer_Delayed_AdherenceCoef(Player, 1.);
+                }
+                case "e_no_steer":
+                {
+                    SetPlayer_Delayed_NoSteer(Player, False);
+                }
             }
         }
         if (_effectOnPlayer.Effect.Marker == "e_ink_splats") {
             InkSplats::SetStatus(Player, False);
         }
-        EventFeed::SendMessage("""$f00 ${{{ _effectOnPlayer.Effect.Color }}}{{{ _effectOnPlayer.Effect.Name }}}$fff ➔ {{{Player.User.Name}}}""", _effectOnPlayer.Effect.ImageURL);
+        // EventFeed::SendMessage("""$f00 ${{{ _effectOnPlayer.Effect.Color }}}{{{ _effectOnPlayer.Effect.Name }}}$fff ➔ {{{Player.User.Name}}}""", _effectOnPlayer.Effect.ImageURL);
     }
     G_EffectOnPlayer.removekey(TextLib::ToText(_effectOnPlayer.StartAt));
 }
@@ -369,7 +407,7 @@ Void OnPlayerActivedEffect(CSmPlayer CurrentPlayer) {
             case "nearest": {
                 declare CSmPlayer NearestPlayer = GetNearestPlayer(CurrentPlayer);
                 ActivateOnPlayer(NearestPlayer, AvilEffect);
-                EventFeed::SendMessage("""$fff ${{{ AvilEffect.Color }}}{{{ AvilEffect.Name }}}$fff ➔ {{{CurrentPlayer.User.Name}}}""", AvilEffect.ImageURL);
+                EventFeed::SendMessage("""$fff ${{{ AvilEffect.Color }}}{{{ AvilEffect.Name }}}$fff {{{CurrentPlayer.User.Name}}} ➔ {{{NearestPlayer.User.Name}}}""", AvilEffect.ImageURL);
                 SetPlayerAvilEffect(CurrentPlayer, 0);
             }
 
@@ -379,7 +417,7 @@ Void OnPlayerActivedEffect(CSmPlayer CurrentPlayer) {
                         ActivateOnPlayer(Player, AvilEffect);
                     }
                 }
-                EventFeed::SendMessage("""$fff ${{{ AvilEffect.Color }}}{{{ AvilEffect.Name }}}$fff ➔ Everyone""", AvilEffect.ImageURL);
+                EventFeed::SendMessage("""$fff ${{{ AvilEffect.Color }}}{{{ AvilEffect.Name }}}$fff {{{CurrentPlayer.User.Name}}} ➔ Everyone""", AvilEffect.ImageURL);
                 SetPlayerAvilEffect(CurrentPlayer, 0);
             }
         }
@@ -399,8 +437,12 @@ Void Yield() {
 
     foreach (Event in PendingEvents) {
         if (Event.Type == CSmModeEvent::EType::OnPlayerTriggersWaypoint) {
-            if (Event.IsNewLap || Event.IsFinish) continue; // Don't assign finished player an effect
-            GivePlayerRandomAvilEffect(Event.Player);   // Try to assign a random effect to the player
+            if (Event.Player != Null) {
+                declare K_BoxEffect effect = G_PlayerEffect[Event.Player.User.Login];
+                if (effect.Name != "None") continue;
+                if (Event.IsNewLap || Event.IsFinish) continue; // Don't assign finished player an effect
+                GivePlayerRandomAvilEffect(Event.Player);   // Try to assign a random effect to the player
+            }
         }
 
         if (Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn) {

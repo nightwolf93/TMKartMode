@@ -1,0 +1,66 @@
+// #RequireContext CSmMlScriptIngame
+
+Text GetManialink() {
+    return """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+    <manialink version="3">
+    <frame pos="-160 50" id="mapFrame">
+    <label id="mapName" pos="49.5 -6" z-index="0" size="98 10.5" halign="center" textsize="5" valign="center" style="TextButtonNavBack" text="Unknown Map" textemboss="1"/>
+    <quad pos="0 0" z-index="0" size="100 13" bgcolor="000" opacity="0.7"/>
+    </frame>
+    <frame pos="-160 35" id="authorFrame">
+    <label id="mapAuthor" pos="8 -4" z-index="0" size="55 8" textsize="2" valign="center2" style="TextButtonNav" textprefix="By " text="unknown author"/>
+    <label pos="4 -4" z-index="0" size="8 8" text="🔨" halign="center" textsize="2" valign="center2" style="TextButtonNav"/>
+    <quad pos="0 0" z-index="0" size="65 8" bgcolor="000" opacity="0.7"/>
+    </frame>
+
+
+    <script><!--
+    declare Text PrevMapName;
+
+    Void DoNothing() { }
+
+    main() {
+
+        declare CMlFrame MapFrame = Page.GetFirstChild("mapFrame") as CMlFrame;
+        declare CMlFrame AuthorFrame = Page.GetFirstChild("authorFrame") as CMlFrame;
+        declare CMlLabel MapName = Page.GetFirstChild("mapName") as CMlLabel;
+        declare CMlLabel AuthorName = Page.GetFirstChild("mapAuthor") as CMlLabel;
+        MapFrame.RelativePosition_V3.X = -300.;
+        AuthorFrame.RelativePosition_V3.X = -400.;
+        declare Processed = False;
+        while (True) {
+            yield;
+            if (Map.MapName != PrevMapName && UI.UISequence == CUIConfig::EUISequence::Intro) {
+                log("show");
+                PrevMapName = Map.MapName;
+                Processed = False;
+                MapName.Value = Map.MapName;
+                AuthorName.Value = Map.AuthorNickName;
+
+                AnimMgr.Flush(MapFrame);
+                AnimMgr.Add(MapFrame, "<elem position=\"-160 50\" />", 1250, CAnimManager::EAnimManagerEasing::CircOut);
+                AnimMgr.Flush(AuthorFrame);
+                AnimMgr.Add(AuthorFrame, "<elem position=\"-160 35\" />", 1250, CAnimManager::EAnimManagerEasing::CircOut);
+            }
+
+            if (!Processed && UI.UISequence != CUIConfig::EUISequence::Intro) {
+                log("hide");
+                Processed = True;
+                AnimMgr.Flush(MapFrame);
+                AnimMgr.Add(MapFrame, "<elem position=\"-300 50\" />", 1250, CAnimManager::EAnimManagerEasing::CircOut);
+                AnimMgr.Flush(AuthorFrame);
+                AnimMgr.Add(AuthorFrame, "<elem position=\"-400 35\" />", 1250, CAnimManager::EAnimManagerEasing::CircOut);
+            }
+
+
+
+
+
+        }
+
+    }
+
+    --></script>
+    </manialink>
+    """;
+}

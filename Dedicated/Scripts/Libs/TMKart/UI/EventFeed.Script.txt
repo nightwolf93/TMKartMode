@@ -9,7 +9,24 @@
 
 #Const C_FeedMessageAmount 8
 
-declare K_FeedMessage[] G_FeedMessages;
+declare K_FeedMessage[][Text] G_FeedMessages;
+
+K_FeedMessage[] GetPlayerMessage(CSmPlayer Player) {
+	if (!G_FeedMessages.existskey(Player.User.Login)) {
+		G_FeedMessages[Player.User.Login] = [];
+	}
+	return G_FeedMessages[Player.User.Login];
+}
+
+Void SetPlayerMessage(CSmPlayer Player, K_FeedMessage Message) {
+	if (Player == Null) return;
+
+	if (!G_FeedMessages.existskey(Player.User.Login)) {
+		G_FeedMessages[Player.User.Login] = [];
+	}
+	G_FeedMessages[Player.User.Login].addfirst(Message);
+	G_FeedMessages[Player.User.Login] = G_FeedMessages[Player.User.Login].slice(0, C_FeedMessageAmount);
+}
 
 Void ClearMessages() {
 	G_FeedMessages.clear();
@@ -17,7 +34,7 @@ Void ClearMessages() {
 		if (Player != Null) {
 			declare netwrite K_FeedMessage[] Net_EventFeed_Messages for Player;
 			declare netwrite Integer Net_EventFeed_Update for Player;
-			Net_EventFeed_Messages = G_FeedMessages;
+			Net_EventFeed_Messages = GetPlayerMessage(Player);
 			Net_EventFeed_Update = Now;
 		}
 	}
@@ -28,14 +45,14 @@ Void ClearMessages() {
 * @param string:Text = main message, displayed in white without colorcodes, supports game colorcodes syntax
 */
 Void SendMessage(Text string, Text IconUrl, CSmPlayer CurrentPlayer) {
-	declare Integer LikeNow = Now;
-	G_FeedMessages.addfirst(K_FeedMessage{Message=string, IconURL=IconUrl, Stamp=LikeNow});
-	G_FeedMessages = G_FeedMessages.slice(0, C_FeedMessageAmount);
 	if (CurrentPlayer != Null) {
+		declare Integer LikeNow = Now;
+		SetPlayerMessage(CurrentPlayer, K_FeedMessage{Message=string, IconURL=IconUrl, Stamp=LikeNow});
+
 		declare netwrite K_FeedMessage[] Net_EventFeed_Messages for CurrentPlayer;
 		declare netwrite Integer Net_EventFeed_Update for CurrentPlayer;
 		Net_EventFeed_Update = LikeNow;
-		Net_EventFeed_Messages = G_FeedMessages;
+		Net_EventFeed_Messages = GetPlayerMessage(CurrentPlayer);
 	}
 }
 
