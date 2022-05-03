@@ -1,38 +1,67 @@
-//#RequireContext CSmMode
+//#rRequireContext CSmMode
+//#RequireContext CSmMlScriptIngame
 
-
-Void SetStatus(CSmPlayer Player, Boolean Status) {
-    declare netwrite Boolean Net_TMKart_InksplatStatus for Player;
+Void Splat(CSmPlayer Player, Integer Duration) {
+    declare netwrite Integer Net_TMKart_InksplatDuration for Player;
     declare netwrite Integer Net_TMKart_InksplatUpdate for Player = -1;
-    Net_TMKart_InksplatStatus = Status;
+    Net_TMKart_InksplatDuration = Duration;
     Net_TMKart_InksplatUpdate = Now;
 }
 
+Void Reset(CSmPlayer Player) {
+    declare netwrite Integer Net_TMKart_InksplatUpdate for Player = -1;
+    Net_TMKart_InksplatUpdate = -1;
+}
 
 Text GetManialink() {
-    //#RequireContext CSmMlScriptIngame
-
     return """
     <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
     <manialink version="3">
     <frame id="Splatter">
-        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
-        <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <!-- stack 1 -->
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <!-- stack 2 -->
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <!-- stack 3 -->
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <!-- stack 4 -->
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
+    <quad size="60 60" opacity="0" colorize="000" image="https://cdn.discordapp.com/attachments/934577399033647104/968986711398973491/unknown.png" halign="center" valign="center"/>
     </frame>
 
     <script><!--
     #Include "MathLib" as Math
     declare CAudioSource SplatSfx;
+    declare Integer[] StackCounter;
 
-    Void EnableSplat() {
+    Void EnableSplat(Integer Duration) {
         declare CMlFrame Frame = Page.GetFirstChild("Splatter") as CMlFrame;
         declare Vec2[] pos;
-        foreach (i => Elem in Frame.Controls) {
-            declare CMlQuad Quad = Elem as CMlQuad;
+        declare Integer x = 0;
+
+        if (StackCounter.count >= 4) return; // no more than 4 stacks...
+        StackCounter.add(Now+Duration);
+        for(i, (StackCounter.count-1)*6, StackCounter.count*6-1) {
+            declare CMlQuad Quad = Frame.Controls[i] as CMlQuad;
             declare newPos = <Math::Rand(-8, 8)*20., Math::Rand(-5, 5)*18.>;
             while (True) {
                 if (pos.exists(newPos)) {
@@ -44,48 +73,33 @@ Text GetManialink() {
             }
             Quad.RelativePosition_V3 = newPos;
             Quad.RelativeRotation = Math::Rand(0., 5.)*15;
-            Quad.Scale = 2.5;
-            AnimMgr.Flush(Quad);
-            AnimMgr.Add(Quad, "<elem opacity=\"1\" />", Now + i*250, 1000, CAnimManager::EAnimManagerEasing::CircIn);
+            Quad.RelativeScale = 2.5;
+            AnimMgr.Add(Quad, "<elem opacity=\"1\" />", Now + x*250, 1000, CAnimManager::EAnimManagerEasing::CircIn);
+            AnimMgr.Add(Quad, "<elem opacity=\"0\" />", Now + Duration + (6 - x)*250 , 1000, CAnimManager::EAnimManagerEasing::CircIn);
+            x+=1;
         }
         SplatSfx.Play();
     }
 
-
-
-
-    Void DisableSplat() {
-        declare CMlFrame Frame = Page.GetFirstChild("Splatter") as CMlFrame;
-        foreach (i => Elem in Frame.Controls) {
-            AnimMgr.Flush(Elem);
-            AnimMgr.Add(Elem, "<elem opacity=\"0\" />", Now + (Frame.Controls.count - i)*250, 1000, CAnimManager::EAnimManagerEasing::CircOut);
-        }
-    }
-
     main() {
         wait(GUIPlayer != Null);
-        declare netread Boolean Net_TMKart_InksplatStatus for GUIPlayer;
+        declare netread Integer Net_TMKart_InksplatDuration for GUIPlayer;
         declare netread Integer Net_TMKart_InksplatUpdate for GUIPlayer = -1;
-        declare Integer LastUpdate;
-        declare Boolean TestValue;
+        declare Integer LastUpdate = 0;
         SplatSfx = Audio.CreateSound("https://cdn.discordapp.com/attachments/934577399033647104/968984484735221780/ink_splash_sfx.ogg", 0., False, False, False);
         while(True) {
             yield;
 
             if (Net_TMKart_InksplatUpdate > LastUpdate) {
                 LastUpdate = Net_TMKart_InksplatUpdate;
-                TestValue = Net_TMKart_InksplatStatus;
-                if (Net_TMKart_InksplatStatus) {
-                    EnableSplat();
-                }
-                else {
-                    DisableSplat();
+                EnableSplat(Net_TMKart_InksplatDuration);
+            }
+
+            foreach(index => EndTime in StackCounter) {
+                if (Now >= EndTime) {
+                    StackCounter.removekey(index);
                 }
             }
-            /*if (TestValue && Now > (LastUpdate + 20000)) {
-                TestValue = False;
-                DisableSplat();
-            }*/
         }
     }
 
