@@ -203,7 +203,7 @@ Void InitEffects() {
     NoGrip.Duration       = 5000;
     G_EffectsList.add(NoGrip);
 
-    // Ink Splats
+    // No Steer
     declare K_BoxEffect NoSteer;
     NoSteer.Name           = "No Steer";
     NoSteer.Marker         = "e_no_steer";
@@ -270,13 +270,13 @@ Void ActivateOnPlayer(CSmPlayer Player, K_BoxEffect Effect) {
             SetPlayer_Delayed_SlowMotion(Player, True);
         }
         case "e_no_grip": {
-            SetPlayer_Delayed_AdherenceCoef(Player, 0.2);
+            SetPlayer_Delayed_AdherenceCoef(Player, 0.25);
         }
         case "e_no_steer": {
             SetPlayer_Delayed_NoSteer(Player, True);
         }
         case "e_ink_splats": {
-            InkSplats::SetStatus(Player, True);
+            InkSplats::Splat(Player, Effect.Duration);
         }
     }
 
@@ -328,10 +328,6 @@ Void UnActivateOnPlayer(K_BoxEffectOnPlayer _effectOnPlayer) {
                 }
             }
         }
-        if (_effectOnPlayer.Effect.Marker == "e_ink_splats") {
-            InkSplats::SetStatus(Player, False);
-        }
-        // EventFeed::SendMessage("""$f00 ${{{ _effectOnPlayer.Effect.Color }}}{{{ _effectOnPlayer.Effect.Name }}}$fff ➔ {{{Player.User.Name}}}""", _effectOnPlayer.Effect.ImageURL);
     }
     G_EffectOnPlayer.removekey(TextLib::ToText(_effectOnPlayer.StartAt));
 }
@@ -346,6 +342,9 @@ Void ClearEffectOnPlayer(CSmPlayer Player) {
 }
 
 Void CleanUp() {
+    foreach (Player in AllPlayers) {
+        InkSplats::Reset(Player);
+    }
     G_PlayerEffect.clear();
 }
 
@@ -439,8 +438,14 @@ Void Yield() {
         if (Event.Type == CSmModeEvent::EType::OnPlayerTriggersWaypoint) {
             if (Event.Player != Null) {
                 declare K_BoxEffect effect = G_PlayerEffect[Event.Player.User.Login];
+                if (Event.IsNewLap) continue; // Don't assign finished player an effect
+                if (Event.IsFinish) {
+                    declare CUIConfig UI = UIManager.UIAll;
+                    UI.SendChat("Finish!");
+                    SetPlayerAvilEffect(Event.Player, 0); // Remove the effect from the player
+                    continue;
+                }
                 if (effect.Name != "None") continue;
-                if (Event.IsNewLap || Event.IsFinish) continue; // Don't assign finished player an effect
                 GivePlayerRandomAvilEffect(Event.Player);   // Try to assign a random effect to the player
             }
         }
