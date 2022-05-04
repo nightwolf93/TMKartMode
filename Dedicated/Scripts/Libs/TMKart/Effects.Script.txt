@@ -440,8 +440,6 @@ Void Yield() {
                 declare K_BoxEffect effect = G_PlayerEffect[Event.Player.User.Login];
                 if (Event.IsNewLap) continue; // Don't assign finished player an effect
                 if (Event.IsFinish) {
-                    declare CUIConfig UI = UIManager.UIAll;
-                    UI.SendChat("Finish!");
                     SetPlayerAvilEffect(Event.Player, 0); // Remove the effect from the player
                     continue;
                 }

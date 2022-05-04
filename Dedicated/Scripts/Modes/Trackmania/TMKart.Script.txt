@@ -12,11 +12,6 @@
 #Setting S_TrustClientSimu True
 #Setting S_UseCrudeExtrapolation False
 
-/////////////
-// Structs //
-/////////////
-
-
 ///////////
 // Plugs //
 ///////////
