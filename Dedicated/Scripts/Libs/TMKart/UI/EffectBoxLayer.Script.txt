@@ -38,14 +38,14 @@ Text GetManialink(K_BoxEffect[] EffectList) {
     {{{ EffectsXml }}}
     </frame>
     <quad pos="0 0" z-index="0" size="25 25" style="Bgs1InRace" substyle="BgColorContour" opacity="0.7" halign="center" valign="center"/>
-    <label pos="-11 -13" z-index="0" size="22 5" textprefix="Use Item: " text="" textsize="1" id="infolabel"/>
-    <label pos="8 8" z-index="0" size="8 8" halign="center" valign="center2" text=""  scriptevents="1" id="Rebind" focusareacolor1="0000" focusareacolor2="04F"/>
+    <label pos="-11 -13" z-index="10" size="22 5" textprefix="Use Item: " text="" textsize="1" id="infolabel"/>
+    <label pos="8 8" z-index="10" size="8 8" halign="center" valign="center2" text=""  scriptevents="1" id="Rebind" focusareacolor1="0000" focusareacolor2="04F"/>
     </frame>
 
     <frame id="dialog" pos="0 30" hidden="1">
-    <label id="bindKb" pos="-30 17" z-index="0" size="41 5" halign="left" valign="center" textprefix="Keyboard: "/>
-    <label id="bindPad" pos="-29 0" z-index="0" size="41 5" halign="left" valign="center" textprefix="Pad: "/>
-    <label id="setPad" pos="-12 -8" z-index="0" size="22 7" text="Set" halign="center" valign="center" scriptevents="1" focusareacolor2="00DDFFFF" focusareacolor1="006C97FF"/><label id="setKb" pos="-12 8" z-index="0" size="22 7" text="Set" halign="center" valign="center" scriptevents="1" focusareacolor2="00DDFFFF" focusareacolor1="006C97FF"/><label id="resetKb" pos="12 8" z-index="0" size="22 7" text="Reset" halign="center" valign="center" scriptevents="1" focusareacolor2="00DDFFFF" focusareacolor1="006C97FF"/><label id="resetPad" pos="12 -8" z-index="0" size="22 7" text="Reset" halign="center" valign="center" scriptevents="1" focusareacolor2="00DDFFFF" focusareacolor1="006C97FF"/><label id="save" pos="0 -22" z-index="0" size="37 7" text="Save" halign="center" valign="center" scriptevents="1" focusareacolor2="00DDFFFF" focusareacolor1="006C97FF"/>
+    <label id="bindKb" pos="-30 17" z-index="10" size="41 5" halign="left" valign="center" textprefix="Keyboard: "/>
+    <label id="bindPad" pos="-29 0" z-index="10" size="41 5" halign="left" valign="center" textprefix="Pad: "/>
+    <label id="setPad" pos="-12 -8" z-index="10" size="22 7" text="Set" halign="center" valign="center" scriptevents="1" focusareacolor2="00DDFFFF" focusareacolor1="006C97FF"/><label id="setKb" pos="-12 8" z-index="0" size="22 7" text="Set" halign="center" valign="center" scriptevents="1" focusareacolor2="00DDFFFF" focusareacolor1="006C97FF"/><label id="resetKb" pos="12 8" z-index="0" size="22 7" text="Reset" halign="center" valign="center" scriptevents="1" focusareacolor2="00DDFFFF" focusareacolor1="006C97FF"/><label id="resetPad" pos="12 -8" z-index="0" size="22 7" text="Reset" halign="center" valign="center" scriptevents="1" focusareacolor2="00DDFFFF" focusareacolor1="006C97FF"/><label id="save" pos="0 -22" z-index="0" size="37 7" text="Save" halign="center" valign="center" scriptevents="1" focusareacolor2="00DDFFFF" focusareacolor1="006C97FF"/>
     <quad pos="0 -4" z-index="0" size="70 52" bgcolor="000" opacity="0.7" halign="center" valign="center"/>
     </frame>
 

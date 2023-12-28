@@ -4,12 +4,12 @@ Text GetManialink() {
     return """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
     <manialink version="3">
     <frame pos="-160 50" id="mapFrame">
-    <label id="mapName" pos="49.5 -6" z-index="0" size="98 10.5" halign="center" textsize="5" valign="center" style="TextButtonNavBack" text="Unknown Map" textemboss="1"/>
+    <label id="mapName" pos="49.5 -6" z-index="10" size="98 10.5" halign="center" textsize="5" valign="center" style="TextButtonNavBack" text="Unknown Map" textemboss="1"/>
     <quad pos="0 0" z-index="0" size="100 13" bgcolor="000" opacity="0.7"/>
     </frame>
     <frame pos="-160 35" id="authorFrame">
-    <label id="mapAuthor" pos="8 -4" z-index="0" size="55 8" textsize="2" valign="center2" style="TextButtonNav" textprefix="By " text="unknown author"/>
-    <label pos="4 -4" z-index="0" size="8 8" text="🔨" halign="center" textsize="2" valign="center2" style="TextButtonNav"/>
+    <label id="mapAuthor" pos="8 -4" z-index="10" size="55 8" textsize="2" valign="center2" style="TextButtonNav" textprefix="By " text="unknown author"/>
+    <label pos="4 -4" z-index="10" size="8 8" text="🔨" halign="center" textsize="2" valign="center2" style="TextButtonNav"/>
     <quad pos="0 0" z-index="0" size="65 8" bgcolor="000" opacity="0.7"/>
     </frame>
 
