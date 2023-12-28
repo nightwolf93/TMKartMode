@@ -3,7 +3,7 @@
 #Include "MathLib" as MathLib
 #Include "TextLib" as TextLib
 
-#Include "Libs/Nadeo/ModeLibs/Legacy/Layers2.Script.txt"    as Layers
+#Include "Libs/Nadeo/CMGame/Modes/Legacy/Layers2.Script.txt"    as Layers
 
 #Include "Libs/TMKart/UI/GameUI.Script.txt"                 as GameUI
 #Include "Libs/TMKart/UI/EffectInkSplats.Script.txt"        as InkSplats

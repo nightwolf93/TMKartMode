@@ -1,5 +1,5 @@
 // #RequireContext CSmMlScriptIngame
-#Include "Libs/Nadeo/TMxSM/Race/Race.Script.txt" as Race
+#Include "Libs/Nadeo/TMGame/Modes/Race.Script.txt" as Race
 
 Void SyncLaps() {
     declare netwrite Integer Net_RaceLapNb for Teams[0];
